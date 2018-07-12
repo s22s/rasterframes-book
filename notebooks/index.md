@@ -15,14 +15,14 @@
 
 ## Python
 * creating-rasterframes [Error with overwrite, no attribute projectedRaster]
-* exporting-rasterframes [localAddScalar DNE]
+* exporting-rasterframes [Savemode not defined]
 * getting-started [X]
 * classification [Still error with multiclass evaluator]
 * clustering [X]
-* statistics [Need spatial functions]
-* geotrellis-ops [Change to not need UDFs]
+* statistics [Add more plotting]
 * ndvi [X]
 * masking [Rasterframe object is not callable]
-* tile-arithmetic [localSubtractScalar DNE]
-* local-spatial-functions [Need local spatial functions]
-* agg-functions [Weird functions with tons of maps]
+* tile-arithmetic [X]
+* local-spatial-functions [X]
+* agg-functions [IntArrayTile DNE]
+
