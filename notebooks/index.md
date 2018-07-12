@@ -14,15 +14,20 @@
 * agg-functions [X]
 
 ## Python
-* creating-rasterframes [Error with overwrite, no attribute projectedRaster]
+* creating-rasterframes [Error with overwrite, do we really need singlebandgeotiff?]
 * exporting-rasterframes [Savemode not defined]
 * getting-started [X]
-* classification [Still error with multiclass evaluator]
+* classification [X]
 * clustering [X]
-* statistics [Add more plotting]
+* statistics [X]
 * ndvi [X]
 * masking [Rasterframe object is not callable]
 * tile-arithmetic [X]
 * local-spatial-functions [X]
 * agg-functions [IntArrayTile DNE]
 
+NDVI demo
+
+Something else:
+Need ag functions
+Need mask
