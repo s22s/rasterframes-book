@@ -1,0 +1,446 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>&lt;no title&gt; &#8212; rasterframes-book  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">#</span> <span class="nc">GeoTrellis</span> <span class="nc">Operations</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">import</span> <span class="nn">astraea.spark.rasterframes._</span>
+<span class="k">import</span> <span class="nn">geotrellis.raster._</span>
+<span class="k">import</span> <span class="nn">geotrellis.raster.render._</span>
+<span class="k">import</span> <span class="nn">geotrellis.raster.io.geotiff.SinglebandGeoTiff</span>
+<span class="k">import</span> <span class="nn">org.apache.spark.sql._</span>
+<span class="k">import</span> <span class="nn">org.apache.spark.sql.functions._</span>
+
+<span class="k">implicit</span> <span class="k">val</span> <span class="n">spark</span> <span class="k">=</span> <span class="nc">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">().</span>
+  <span class="n">master</span><span class="o">(</span><span class="s">&quot;local[*]&quot;</span><span class="o">).</span><span class="n">appName</span><span class="o">(</span><span class="s">&quot;RasterFrames&quot;</span><span class="o">).</span><span class="n">getOrCreate</span><span class="o">().</span><span class="n">withRasterFrames</span>
+<span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">setLogLevel</span><span class="o">(</span><span class="s">&quot;ERROR&quot;</span><span class="o">)</span>
+<span class="k">import</span> <span class="nn">spark.implicits._</span>
+<span class="k">val</span> <span class="n">scene</span> <span class="k">=</span> <span class="nc">SinglebandGeoTiff</span><span class="o">(</span><span class="s">&quot;../samples/L8-B8-Robinson-IL.tiff&quot;</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">rf</span> <span class="k">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">projectedRaster</span><span class="o">.</span><span class="n">toRF</span><span class="o">(</span><span class="mi">128</span><span class="o">,</span> <span class="mi">128</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>Intitializing Scala interpreter ...
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>Spark Web UI available at http://172.18.0.2:4041
+SparkContext available as &#39;sc&#39; (version = 2.2.0, master = local[*], app id = local-1530810905187)
+SparkSession available as &#39;spark&#39;
+
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[1]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>import astraea.spark.rasterframes._
+import geotrellis.raster._
+import geotrellis.raster.render._
+import geotrellis.raster.io.geotiff.SinglebandGeoTiff
+import org.apache.spark.sql._
+import org.apache.spark.sql.functions._
+spark: org.apache.spark.sql.SparkSession = org.apache.spark.sql.SparkSession@48f0a03c
+import spark.implicits._
+scene: geotrellis.raster.io.geotiff.SinglebandGeoTiff = SinglebandGeoTiff(geotrellis.raster.UShortConstantNoDataArrayTile@3b0587d8,Extent(431902.5, 4313647.5, 443512.5, 4321147.5),EPSG:32616,Tags(Map(AREA_OR_POINT -&gt; POINT),List(Map())),GeoTiffOptions(geotrellis.raster.io.geotiff.Striped@4931bd7e,geotrellis.raster.io.geotiff.compression.DeflateCompression$@5e1dd8c7,1,None))
+rf: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct&lt;col: int, row: int&gt;, t...
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="nc">GeoTrellis</span> <span class="n">provides</span> <span class="n">a</span> <span class="o">[</span><span class="kt">rich</span> <span class="kt">set</span> <span class="kt">of</span> <span class="kt">Map</span> <span class="kt">Algebra</span> <span class="kt">operations</span><span class="o">](</span><span class="n">https</span><span class="o">://</span><span class="n">docs</span><span class="o">.</span><span class="n">geotrellis</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">en</span><span class="o">/</span><span class="n">latest</span><span class="o">/</span><span class="n">guide</span><span class="o">/</span><span class="n">core</span><span class="o">-</span><span class="n">concepts</span><span class="o">.</span><span class="n">html</span><span class="k">#</span><span class="n">map</span><span class="o">-</span><span class="n">algebra</span><span class="o">)</span> <span class="n">and</span> <span class="n">other</span> <span class="n">tile</span> <span class="n">processing</span> <span class="n">features</span> <span class="n">that</span> <span class="n">can</span> <span class="n">be</span> <span class="n">used</span> <span class="k">with</span> <span class="nc">RasterFrames</span> <span class="n">via</span> <span class="nc">Spark</span><span class=" -Symbol">&#39;s</span> <span class="nc">UDF</span> <span class="n">support</span><span class="o">.</span>
+
+<span class="nc">Here</span><span class=" -Symbol">&#39;s</span> <span class="n">an</span> <span class="n">example</span> <span class="n">creating</span> <span class="n">a</span> <span class="nc">UDFs</span> <span class="n">to</span> <span class="n">invoke</span> <span class="n">the</span> <span class="n">`equalize`</span> <span class="n">transformation</span> <span class="n">on</span> <span class="n">each</span> <span class="n">tile</span> <span class="n">in</span> <span class="n">a</span> <span class="nc">RasterFrame</span><span class="o">,</span> <span class="n">and</span> <span class="n">then</span> <span class="n">compute</span> <span class="n">the</span> <span class="n">resulting</span> <span class="n">per</span><span class="o">-</span><span class="n">tile</span> <span class="n">mean</span> <span class="n">of</span> <span class="n">it</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">import</span> <span class="nn">geotrellis.raster.equalization._</span>
+<span class="k">val</span> <span class="n">equalizer</span> <span class="k">=</span> <span class="n">udf</span><span class="o">((</span><span class="n">t</span><span class="k">:</span> <span class="kt">Tile</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">t</span><span class="o">.</span><span class="n">equalize</span><span class="o">())</span>
+<span class="k">val</span> <span class="n">equalized</span> <span class="k">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="n">equalizer</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;tile&quot;</span><span class="o">)</span> <span class="n">as</span> <span class="s">&quot;equalized&quot;</span><span class="o">)</span>
+<span class="n">equalized</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="n">tileMean</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;equalized&quot;</span><span class="o">)</span> <span class="n">as</span> <span class="s">&quot;equalizedMean&quot;</span><span class="o">).</span><span class="n">show</span><span class="o">(</span><span class="mi">5</span><span class="o">,</span> <span class="kc">false</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++------------------+
+|equalizedMean     |
++------------------+
+|32634.257767197705|
+|32777.45174876396 |
+|32775.68302508698 |
+|32881.48989806507 |
+|32776.88976377953 |
++------------------+
+only showing top 5 rows
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[2]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>import geotrellis.raster.equalization._
+equalizer: org.apache.spark.sql.expressions.UserDefinedFunction = UserDefinedFunction(&lt;function1&gt;,org.apache.spark.sql.gt.types.TileUDT@67300a29,Some(List(org.apache.spark.sql.gt.types.TileUDT@67300a29)))
+equalized: org.apache.spark.sql.DataFrame = [equalized: rf_tile]
+
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="nc">Here</span><span class=" -Symbol">&#39;s</span> <span class="n">an</span> <span class="n">example</span> <span class="n">downsampling</span> <span class="n">a</span> <span class="n">tile</span> <span class="n">and</span> <span class="n">rendering</span> <span class="n">each</span> <span class="n">tile</span> <span class="n">as</span> <span class="n">a</span> <span class="n">matrix</span> <span class="n">of</span> <span class="n">numerical</span> <span class="n">values</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">downsample</span> <span class="k">=</span> <span class="n">udf</span><span class="o">((</span><span class="n">t</span><span class="k">:</span> <span class="kt">Tile</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">t</span><span class="o">.</span><span class="n">resample</span><span class="o">(</span><span class="mi">4</span><span class="o">,</span> <span class="mi">4</span><span class="o">))</span>
+<span class="k">val</span> <span class="n">downsampled</span> <span class="k">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="n">renderAscii</span><span class="o">(</span><span class="n">downsample</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;tile&quot;</span><span class="o">))</span> <span class="n">as</span> <span class="s">&quot;minime&quot;</span><span class="o">)</span>
+<span class="n">downsampled</span><span class="o">.</span><span class="n">show</span><span class="o">(</span><span class="mi">5</span><span class="o">,</span> <span class="kc">false</span><span class="o">)</span>
+
+<span class="n">spark</span><span class="o">.</span><span class="n">stop</span><span class="o">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-------------------+
+|minime             |
++-------------------+
+|∘∘∘∘
+∘∘∘∘
+∘∘∘∘
+∘∘∘∘|
+|.%*+
+=@=@
+#+:#
+:-  |
+|#:.%
+* +
+=:-@
+@#=+|
+|-+%=
+:*:.
+=+ @
+#@ #|
+|-:*+
+.=-.
+ +@#
+%.@#|
++-------------------+
+only showing top 5 rows
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[3]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>downsample: org.apache.spark.sql.expressions.UserDefinedFunction = UserDefinedFunction(&lt;function1&gt;,org.apache.spark.sql.gt.types.TileUDT@67300a29,Some(List(org.apache.spark.sql.gt.types.TileUDT@67300a29)))
+downsampled: org.apache.spark.sql.DataFrame = [minime: string]
+
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, James Nachbar.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../../_sources/notebooks/Scala/geotrellis-ops-scala.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

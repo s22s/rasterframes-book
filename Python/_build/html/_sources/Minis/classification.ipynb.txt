@@ -1,0 +1,608 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Classification\n",
+    "\n",
+    "In this example we will do some simple cell classification based on multiband imagery and a\n",
+    "target/label raster. Classification is the process of learning a mapping between points and labels, and then applying that mapping to other points whose labels are unknown. As a part of the process we'll explore the cross-validation support in\n",
+    "SparkML.\n",
+    "\n",
+    "## Setup\n",
+    "\n",
+    "First some setup. There are imports to make and the spark instance is gonna "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from pyrasterframes import *\n",
+    "from pyrasterframes.rasterfunctions import *\n",
+    "from pyrasterframes.types import NoDataFilter\n",
+    "import pyspark\n",
+    "from pyspark.sql import SparkSession\n",
+    "from pyspark.ml.feature import VectorAssembler\n",
+    "from pyspark.ml.classification import DecisionTreeClassifier\n",
+    "from pyspark.ml.evaluation import MulticlassClassificationEvaluator\n",
+    "from pyspark.ml.tuning import ParamGridBuilder, CrossValidator\n",
+    "from pyspark.ml import Pipeline\n",
+    "from pathlib import Path\n",
+    "\n",
+    "spark = SparkSession.builder. \\\n",
+    "    master(\"local[*]\"). \\\n",
+    "    appName(\"RasterFrames\"). \\\n",
+    "    config(\"spark.ui.enabled\", \"false\"). \\\n",
+    "    getOrCreate(). \\\n",
+    "    withRasterFrames()\n",
+    "\n",
+    "# Utility for reading imagery from our test data set\n",
+    "resource_dir = Path('./samples').resolve()\n",
+    "# Utility for reading imagery from our test data set\n",
+    "filenamePattern = \"L8-B{}-Elkton-VA.tiff\"\n",
+    "bandNumbers = range(1, 8)\n",
+    "bandColNames = list(map(lambda n: 'band_{}'.format(n), bandNumbers))\n",
+    "\n",
+    "def readTiff(name):\n",
+    "    return resource_dir.joinpath(filenamePattern.format(name)).as_uri()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Loading Data\n",
+    "\n",
+    "The first step is to load multiple bands of imagery and construct a single RasterFrame from them.\n",
+    "To do this we:\n",
+    "\n",
+    "1. Identify the GeoTIFF filename. \n",
+    "2. Read the TIFF raster\n",
+    "3. Convert to a raster frame of `tileSize` sized tiles, with an appropriate column name\n",
+    "4. Use the RasterFrames `spatialJoin` function to create a new RasterFrame with a column for each band\n",
+    " "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from functools import reduce\n",
+    "joinedRF = reduce(lambda rf1, rf2: rf1.asRF().spatialJoin(rf2.drop('bounds').drop('metadata')),\n",
+    "                  map(lambda bf: spark.read.geotiff(bf[1]) \\\n",
+    "                      .withColumnRenamed('tile', 'band_{}'.format(bf[0])),\n",
+    "                  map(lambda b: (b, readTiff(b)), bandNumbers)))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We should see a single `spatial_key` column along with 6 columns of tiles."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "root\n",
+      " |-- spatial_key: struct (nullable = false)\n",
+      " |    |-- col: integer (nullable = false)\n",
+      " |    |-- row: integer (nullable = false)\n",
+      " |-- bounds: polygon (nullable = true)\n",
+      " |-- metadata: map (nullable = true)\n",
+      " |    |-- key: string\n",
+      " |    |-- value: string (valueContainsNull = false)\n",
+      " |-- band_1: rf_tile (nullable = false)\n",
+      " |-- band_2: rf_tile (nullable = false)\n",
+      " |-- band_3: rf_tile (nullable = false)\n",
+      " |-- band_4: rf_tile (nullable = false)\n",
+      " |-- band_5: rf_tile (nullable = false)\n",
+      " |-- band_6: rf_tile (nullable = false)\n",
+      " |-- band_7: rf_tile (nullable = false)\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "joinedRF.printSchema()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Similarly pull we pull in the target label data."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "targetCol = \"target\"\n",
+    "\n",
+    "target = spark.read.geotiff(resource_dir.joinpath(\"L8-Labels-Elkton-VA.tiff\").as_uri()).withColumnRenamed('tile', targetCol)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Take a peek at what kind of label data we have to work with."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+----------------------------------------------------------+\n",
+      "|aggStats(target)                                          |\n",
+      "+----------------------------------------------------------+\n",
+      "|[1626,29808,0.0,2.0,0.8031980319803198,0.2798421711154381]|\n",
+      "+----------------------------------------------------------+\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "target.select(aggStats(\"target\")).show(1, False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Join the target label RasterFrame with the band tiles to create our analytics base table"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "root\n",
+      " |-- spatial_key: struct (nullable = false)\n",
+      " |    |-- col: integer (nullable = false)\n",
+      " |    |-- row: integer (nullable = false)\n",
+      " |-- band_1: rf_tile (nullable = false)\n",
+      " |-- band_2: rf_tile (nullable = false)\n",
+      " |-- band_3: rf_tile (nullable = false)\n",
+      " |-- band_4: rf_tile (nullable = false)\n",
+      " |-- band_5: rf_tile (nullable = false)\n",
+      " |-- band_6: rf_tile (nullable = false)\n",
+      " |-- band_7: rf_tile (nullable = false)\n",
+      " |-- target: rf_tile (nullable = false)\n",
+      " |-- band_8: rf_tile (nullable = true)\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "abt = joinedRF.spatialJoin(target).drop('bounds', 'metadata').asRF()\n",
+    "abt_1_2 = abt.withColumn(\"band_8\", localAdd(\"band_1\", \"band_2\"))\n",
+    "abt_1_2.printSchema()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "('band_1',\n",
+       " 'band_2',\n",
+       " 'band_3',\n",
+       " 'band_4',\n",
+       " 'band_5',\n",
+       " 'band_6',\n",
+       " 'band_7',\n",
+       " 'target')"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def append(lst, elem):\n",
+    "    return tuple(lst + [elem])\n",
+    "\n",
+    "append(bandColNames, targetCol)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## ML Pipeline\n",
+    "\n",
+    "The data preparation modeling pipeline is next. SparkML requires that each observation be in \n",
+    "its own row, and those observations be packed into a single `Vector` type. The first step is \n",
+    "to \"explode\" the tiles into a single row per cell/pixel. Then we filter out any rows that\n",
+    "have `NoData` values (which will cause an error during training). Finally we use the\n",
+    "SparkML `VectorAssembler` to create that `Vector`. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "exploder = TileExploder()\n",
+    "\n",
+    "ndFilter = NoDataFilter()\n",
+    "ndFilter.setInputCols(append(bandColNames, targetCol))\n",
+    "\n",
+    "assembler = VectorAssembler(inputCols=bandColNames, outputCol=\"features\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We are going to use a decision tree for classification. You can swap out one of the other multi-class\n",
+    "classification algorithms if you like. With the algorithm selected we can assemble our modeling pipeline."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "classifier = DecisionTreeClassifier(labelCol=\"target\", featuresCol=assembler.getOutputCol())\n",
+    "\n",
+    "pipeline = Pipeline(stages=[exploder, ndFilter, assembler, classifier])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Cross Validation\n",
+    "\n",
+    "To extend the sophistication of the example we are going to use the SparkML support for \n",
+    "cross-validation and hyper-parameter tuning. The first step is to configure how we're \n",
+    "going to evaluate our model's performance. Then we define the hyperparmeter(s) we're going to \n",
+    "vary and evaluate. Finally we configure the cross validator. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 57,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "evaluator = MulticlassClassificationEvaluator(labelCol=\"target\", predictionCol=\"prediction\", metricName=\"accuracy\")\n",
+    "\n",
+    "paramGrid = ParamGridBuilder().build()\n",
+    "\n",
+    "trainer = CrossValidator(estimator=pipeline, estimatorParamMaps=paramGrid, evaluator=evaluator, numFolds=3)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Push the \"go\" button:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model = pipeline.fit(abt)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "fitted = model.transform(abt)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Row(avg(prediction)=0.8025830258302583)"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "fitted.agg({\"prediction\": \"mean\"}).collect()[0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "root\n",
+      " |-- spatial_key: struct (nullable = false)\n",
+      " |    |-- col: integer (nullable = false)\n",
+      " |    |-- row: integer (nullable = false)\n",
+      " |-- column_index: integer (nullable = false)\n",
+      " |-- row_index: integer (nullable = false)\n",
+      " |-- band_1: double (nullable = false)\n",
+      " |-- band_2: double (nullable = false)\n",
+      " |-- band_3: double (nullable = false)\n",
+      " |-- band_4: double (nullable = false)\n",
+      " |-- band_5: double (nullable = false)\n",
+      " |-- band_6: double (nullable = false)\n",
+      " |-- band_7: double (nullable = false)\n",
+      " |-- target: double (nullable = false)\n",
+      " |-- features: vector (nullable = true)\n",
+      " |-- rawPrediction: vector (nullable = true)\n",
+      " |-- probability: vector (nullable = true)\n",
+      " |-- prediction: double (nullable = true)\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "fitted.printSchema()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Model Evaluation\n",
+    "\n",
+    "To view the model's performance we create an evaluator and compare the result and the ground truth based on accuracy."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "evaluator = MulticlassClassificationEvaluator(\n",
+    "    labelCol=\"target\", predictionCol=\"prediction\", metricName=\"accuracy\")\n",
+    "accuracy = evaluator.evaluate(fitted)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.9993849938499385"
+      ]
+     },
+     "execution_count": 18,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "accuracy"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Finally, we score the original data set (including the cells without target values) and \n",
+    "add up class membership results."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+----------+-----+\n",
+      "|prediction|count|\n",
+      "+----------+-----+\n",
+      "|       0.0| 9682|\n",
+      "|       1.0|13459|\n",
+      "|       2.0| 8293|\n",
+      "+----------+-----+\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "scored = model.transform(joinedRF)\n",
+    "\n",
+    "scored.groupby(\"prediction\").count().show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Visualizing Results\n",
+    "\n",
+    "The predictions are in a DataFrame with each row representing a separate pixel. \n",
+    "To assemble a raster to visualize the class assignments, we have to go through a\n",
+    "multi-stage process to get the data back in tile form, and from there to combined\n",
+    "raster form.\n",
+    "\n",
+    "First, we get the DataFrame back into RasterFrame form:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "tlm = joinedRF.tileLayerMetadata()\n",
+    "layout = layout = tlm['layoutDefinition']['tileLayout']\n",
+    "\n",
+    "retiled = scored.groupBy('spatial_key').agg(\n",
+    "    assembleTile('column_index', 'row_index', 'prediction',\n",
+    "        layout['tileCols'], layout['tileRows'], 'int8')\n",
+    ")\n",
+    "\n",
+    "rf = retiled.asRF(\"spatial_key\", tlm)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 94,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+-----------+--------------------+\n",
+      "|spatial_key|          prediction|\n",
+      "+-----------+--------------------+\n",
+      "|      [0,0]|ByteConstantNoDat...|\n",
+      "+-----------+--------------------+\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "rf.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "To render our visualization, we convert to a raster first, and then use an\n",
+    "`IndexedColorMap` to assign each discrete class a different color, and finally\n",
+    "rendering to a PNG file."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 111,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import matplotlib as mpl\n",
+    "import matplotlib.pyplot as plt\n",
+    "import matplotlib.image as mpimg\n",
+    "\n",
+    "raster = np.asarray(list(rf.toIntRaster(\"prediction\", 186, 169)))\n",
+    "pixels = np.reshape(raster, (169, 186))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'plt' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "\u001b[0;32m<ipython-input-3-4437a38ed2af>\u001b[0m in \u001b[0;36m<module>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0mfig\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfigure\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mfigsize\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;36m16\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;36m16\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      2\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      3\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      4\u001b[0m \u001b[0mfig\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0madd_subplot\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;36m1\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m2\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m1\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      5\u001b[0m \u001b[0mimgplot\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mimshow\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mpixels\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;31mNameError\u001b[0m: name 'plt' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "fig = plt.figure(figsize=(16,16))\n",
+    "\n",
+    "\n",
+    "fig.add_subplot(1, 2, 1)\n",
+    "imgplot = plt.imshow(pixels)\n",
+    "imgplot.set_cmap('viridis')\n",
+    "fig.add_subplot(1, 2, 2)\n",
+    "pixels2 = mpl.pyplot.imread(\"pics/L8-RGB-VA.png\")\n",
+    "imgplot = plt.imshow(pixels2)\n",
+    "fig.add_subplot(1, 2, 2)\n",
+    "pixels3 = mpl.pyplot.imread(\"pics/target-labels.png\")\n",
+    "imgplot = plt.imshow(pixels3)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "On the left we can see the assignments made by classifier. On the right we can see the ground truth training set laid on top of the original RGB image. It appears that the labels seperate dense vegetation, farmland, and an urban area, which is reflected fairly accurately in the model's assignments."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

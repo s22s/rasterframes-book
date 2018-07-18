@@ -1,0 +1,622 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Tile masking &#8212; rasterframes-book  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="section" id="Tile-masking">
+<h1>Tile masking<a class="headerlink" href="#Tile-masking" title="Permalink to this headline">¶</a></h1>
+<p>Masking is a common operation to use when performing analysis across
+tiles. Tile masking allows one to compare two tiles, a value tile and a
+masking tile. The masking tile can be thought of as being placed on top
+of the other tile, obscuring certain values. Masking cells set to NODATA
+are opaque, and cells that are anything else are transparent. In this
+way, value cells that correspond to masking cells that are NODATA become
+NODATA and value cells corresponding to other values are untouched.</p>
+<p>Initial setup:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [192]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pyrasterframes</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pyrasterframes.rasterfunctions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">pyspark</span>
+<span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="k">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span> \
+    <span class="n">master</span><span class="p">(</span><span class="s2">&quot;local[*]&quot;</span><span class="p">)</span><span class="o">.</span> \
+    <span class="n">appName</span><span class="p">(</span><span class="s2">&quot;RasterFrames&quot;</span><span class="p">)</span><span class="o">.</span> \
+    <span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.ui.enabled&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span><span class="o">.</span> \
+    <span class="n">getOrCreate</span><span class="p">()</span><span class="o">.</span> \
+    <span class="n">withRasterFrames</span><span class="p">()</span>
+
+<span class="n">sc</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span>
+
+<span class="n">resource_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;./samples&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">readTiff</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">resource_dir</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">filenamePattern</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span><span class="o">.</span><span class="n">as_uri</span><span class="p">()</span>
+
+<span class="n">filenamePattern</span> <span class="o">=</span> <span class="s2">&quot;L8-B</span><span class="si">{}</span><span class="s2">-Elkton-VA.tiff&quot;</span>
+<span class="n">bandNumbers</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">bandColNames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="s1">&#39;band_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">bandNumbers</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [205]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># The literal column will be used to perform a join later</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
+<span class="n">joinedRF</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">rf1</span><span class="p">,</span> <span class="n">rf2</span><span class="p">:</span> <span class="n">rf1</span><span class="o">.</span><span class="n">asRF</span><span class="p">()</span><span class="o">.</span><span class="n">spatialJoin</span><span class="p">(</span><span class="n">rf2</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;bounds&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">)),</span>
+                  <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">bf</span><span class="p">:</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">geotiff</span><span class="p">(</span><span class="n">bf</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> \
+                      <span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span><span class="s1">&#39;tile&#39;</span><span class="p">,</span> <span class="s1">&#39;band_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bf</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span>
+                  <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">b</span><span class="p">:</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">readTiff</span><span class="p">(</span><span class="n">b</span><span class="p">)),</span> <span class="n">bandNumbers</span><span class="p">)))</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;joinCol&quot;</span><span class="p">,</span> <span class="n">lit</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">asRF</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [194]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">joinedRF</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-----------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+-------+
+|spatial_key|              bounds|            metadata|              band_1|              band_2|              band_3|              band_4|joinCol|
++-----------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+-------+
+|      [0,0]|POLYGON ((703986....|Map(AREA_OR_POINT...|geotrellis.raster...|geotrellis.raster...|geotrellis.raster...|geotrellis.raster...|      1|
++-----------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+-------+
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [195]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">rastArray</span> <span class="o">=</span> <span class="n">joinedRF</span><span class="o">.</span><span class="n">toDoubleRaster</span><span class="p">(</span><span class="s2">&quot;band_1&quot;</span><span class="p">,</span> <span class="mi">186</span><span class="p">,</span> <span class="mi">169</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++--------------------------+
+|celltypeexpression(band_1)|
++--------------------------+
+|                 uint16raw|
++--------------------------+
+
+</pre></div></div>
+</div>
+<p>We take the values from our raster array and run them through a
+threshold, returning one if they are high enough and NaN if they are too
+low.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [196]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">threshold</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">31434</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">rastArray</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">10500</span><span class="p">:</span>
+        <span class="n">threshold</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">threshold</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">NaN</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [197]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">df</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">parallelize</span><span class="p">([</span><span class="nb">list</span><span class="p">([</span><span class="n">threshold</span><span class="p">])])</span><span class="o">.</span><span class="n">toDF</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [223]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="k">import</span> <span class="n">lit</span>
+<span class="n">tiledDF</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;maskTile&quot;</span><span class="p">,</span> <span class="n">arrayToTile</span><span class="p">(</span><span class="s2">&quot;_1&quot;</span><span class="p">,</span> <span class="mi">186</span><span class="p">,</span> <span class="mi">169</span><span class="p">))</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;joinCol&quot;</span><span class="p">,</span> <span class="n">lit</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>The cell type here is initially raw, which means that it does not
+support any NODATA value, which is a requirement for masking. We use
+<code class="docutils literal"><span class="pre">convertCellType</span></code> to change the type away from raw.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [264]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">joinedRF</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">cellType</span><span class="p">(</span><span class="s2">&quot;band_2&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">joinedRF</span> <span class="o">=</span> <span class="n">joinedRF</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;band_2_ND&quot;</span><span class="p">,</span> <span class="n">convertCellType</span><span class="p">(</span><span class="s2">&quot;band_2&quot;</span><span class="p">,</span> <span class="s1">&#39;uint16&#39;</span><span class="p">))</span>
+
+<span class="n">joinedRF</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">cellType</span><span class="p">(</span><span class="s2">&quot;band_2_ND&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++--------------------------+
+|celltypeexpression(band_2)|
++--------------------------+
+|                 uint16raw|
++--------------------------+
+
++-----------------------------+
+|celltypeexpression(band_2_ND)|
++-----------------------------+
+|                       uint16|
++-----------------------------+
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [226]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">joinedRF</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+root
+ |-- spatial_key: struct (nullable = false)
+ |    |-- col: integer (nullable = false)
+ |    |-- row: integer (nullable = false)
+ |-- bounds: polygon (nullable = true)
+ |-- metadata: map (nullable = true)
+ |    |-- key: string
+ |    |-- value: string (valueContainsNull = false)
+ |-- band_1: rf_tile (nullable = false)
+ |-- band_2: rf_tile (nullable = false)
+ |-- band_3: rf_tile (nullable = false)
+ |-- band_4: rf_tile (nullable = false)
+ |-- joinCol: integer (nullable = false)
+ |-- band_2_ND: rf_tile (nullable = true)
+
+</pre></div></div>
+</div>
+<p>Because the tile has a cellType of raw, there is not a NODATA value. One
+possible solution is to convert the CellType to something that does
+support NODATA values. This transformation is wrapped into a threshold
+function that creates a new tile based on whether the cell values in an
+input tile are higher than a certain number.</p>
+<p>First, must create a masking tile based on some criteria, in this case,
+whether a cell value is past a threshold. This tile is full of either
+NODATA cells or the unchanged cell values corresponsing to whether the
+value in the input cell is greater than a threshold.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [227]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">withMaskedTile</span> <span class="o">=</span> <span class="n">joinedRF</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tiledDF</span><span class="p">,</span> <span class="n">joinedRF</span><span class="p">[</span><span class="s2">&quot;joinCol&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">tiledDF</span><span class="p">[</span><span class="s2">&quot;joinCol&quot;</span><span class="p">],</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [237]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">withMaskedTile</span> <span class="o">=</span> <span class="n">withMaskedTile</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;maskTileND&quot;</span><span class="p">,</span> <span class="n">convertCellType</span><span class="p">(</span><span class="s2">&quot;maskTile&quot;</span><span class="p">,</span> <span class="s1">&#39;uint16&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [238]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">withMaskedTile</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">noDataCells</span><span class="p">(</span><span class="s2">&quot;maskTileND&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-----------------------+
+|noDataCells(maskTileND)|
++-----------------------+
+|                  28570|
++-----------------------+
+
+</pre></div></div>
+</div>
+<div class="section" id="Mask">
+<h2>Mask<a class="headerlink" href="#Mask" title="Permalink to this headline">¶</a></h2>
+<p>Mask is an operation that takes two tiles and eliminates data from one
+cell that corresponds to a value in the other. For instance, if a cell
+in the masking tile contains a NODATA, the corresponding cell in the
+other tile would be set to NODATA. If the masking cell contained
+anything else, the corresponding cell would have its value untouched.
+The mean is thus high, since all cells with a low reflectance were
+masked over.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [262]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">masked</span> <span class="o">=</span> <span class="n">withMaskedTile</span> \
+  <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;masked&quot;</span><span class="p">,</span> <span class="n">mask</span><span class="p">(</span><span class="n">joinedRF</span><span class="p">[</span><span class="s2">&quot;band_2_ND&quot;</span><span class="p">],</span> <span class="n">withMaskedTile</span><span class="p">[</span><span class="s2">&quot;maskTileND&quot;</span><span class="p">]))</span><span class="o">.</span><span class="n">asRF</span><span class="p">()</span>
+<span class="n">masked</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">tileStats</span><span class="p">(</span><span class="s2">&quot;masked&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-------------------------------------------------------------+
+|tileStats(masked)                                            |
++-------------------------------------------------------------+
+|[2864,-1,9630.0,22147.0,10648.890363128503,1494703.325270259]|
++-------------------------------------------------------------+
+
+</pre></div></div>
+</div>
+<div class="section" id="Inverse-Mask">
+<h3>Inverse Mask<a class="headerlink" href="#Inverse-Mask" title="Permalink to this headline">¶</a></h3>
+<p>Inverse mask works in the opposite way; It doesn’t touch the cells that
+are set to NODATA in the masking tile and all other cells become NODATA.
+The mean is low for the same reason that the masked mean is high: High
+values were reverse masked over.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [263]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">inversemasked</span> <span class="o">=</span> <span class="n">withMaskedTile</span> \
+  <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;inversemasked&quot;</span><span class="p">,</span> <span class="n">inverseMask</span><span class="p">(</span><span class="n">joinedRF</span><span class="p">[</span><span class="s2">&quot;band_2_ND&quot;</span><span class="p">],</span> <span class="n">withMaskedTile</span><span class="p">[</span><span class="s2">&quot;maskTileND&quot;</span><span class="p">]))</span><span class="o">.</span><span class="n">asRF</span><span class="p">()</span>
+<span class="n">inversemasked</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">tileStats</span><span class="p">(</span><span class="s2">&quot;inversemasked&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++------------------------------------------------------------+
+|tileStats(inversemasked)                                    |
++------------------------------------------------------------+
+|[28570,-1,8275.0,9996.0,8756.359047952406,118202.5029361604]|
++------------------------------------------------------------+
+
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">raster1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">masked</span><span class="o">.</span><span class="n">toIntRaster</span><span class="p">(</span><span class="s1">&#39;masked&#39;</span><span class="p">,</span> <span class="mi">186</span><span class="p">,</span> <span class="mi">169</span><span class="p">)))</span>
+<span class="n">pixels1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">raster1</span><span class="p">,</span> <span class="p">(</span><span class="mi">169</span><span class="p">,</span> <span class="mi">186</span><span class="p">))</span>
+<span class="n">raster2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">inversemasked</span><span class="o">.</span><span class="n">toIntRaster</span><span class="p">(</span><span class="s1">&#39;inversemasked&#39;</span><span class="p">,</span> <span class="mi">186</span><span class="p">,</span> <span class="mi">169</span><span class="p">)))</span>
+<span class="n">pixels2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">raster2</span><span class="p">,</span> <span class="p">(</span><span class="mi">169</span><span class="p">,</span> <span class="mi">186</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [259]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.image</span> <span class="k">as</span> <span class="nn">mpimg</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">16</span><span class="p">))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Masked&quot;</span><span class="p">)</span>
+<span class="n">imgplot</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">pixels1</span><span class="p">)</span>
+<span class="n">imgplot</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="s1">&#39;Accent_r&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Inverse Masked&quot;</span><span class="p">)</span>
+<span class="n">imgplot</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">pixels2</span><span class="p">)</span>
+<span class="n">imgplot</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="s1">&#39;Accent_r&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/Minis_masking_23_0.png" src="../_images/Minis_masking_23_0.png" />
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, James Nachbar.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/Minis/masking.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

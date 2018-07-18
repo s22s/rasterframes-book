@@ -1,0 +1,398 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Aggregate functions\n",
+    "Aggregate functions operate on whole columns of tiles at once, typically returning a tile that is the result of the operation . An example of this type of function is finding the mean cell values of a column of tiles. Other statistical and diagnostic tasks can be performed on columns of tiles at a time."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Intitializing Scala interpreter ..."
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "text/plain": [
+       "Spark Web UI available at http://172.18.0.2:4040\n",
+       "SparkContext available as 'sc' (version = 2.2.0, master = local[*], app id = local-1531150452627)\n",
+       "SparkSession available as 'spark'\n"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "text/plain": [
+       "import astraea.spark.rasterframes._\n",
+       "import geotrellis.raster.io.geotiff.SinglebandGeoTiff\n",
+       "import org.apache.spark.sql._\n",
+       "import org.apache.spark.sql.functions._\n",
+       "import geotrellis.spark.SpatialKey._\n",
+       "import geotrellis.raster._\n",
+       "import geotrellis.raster.mapalgebra.local._\n",
+       "spark: org.apache.spark.sql.SparkSession = org.apache.spark.sql.SparkSession@6eba17f9\n",
+       "sc: org.apache.spark.SparkContext = org.apache.spark.SparkContext@1584a0d0\n",
+       "readTiff: (name: String)geotrellis.raster.io.geotiff.SinglebandGeoTiff\n",
+       "filenamePattern: String = L8-B%d-Elkton-VA.tiff\n"
+      ]
+     },
+     "execution_count": 1,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import astraea.spark.rasterframes._\n",
+    "import geotrellis.raster.io.geotiff.SinglebandGeoTiff\n",
+    "import org.apache.spark.sql._\n",
+    "import org.apache.spark.sql.functions._\n",
+    "import geotrellis.spark.SpatialKey._\n",
+    "import geotrellis.raster._\n",
+    "import geotrellis.raster.mapalgebra.local._\n",
+    "\n",
+    "\n",
+    "implicit val spark = SparkSession.builder().\n",
+    "  master(\"local\").appName(\"RasterFrames\").\n",
+    "  config(\"spark.ui.enabled\", \"false\").\n",
+    "  getOrCreate().\n",
+    "  withRasterFrames\n",
+    "\n",
+    "val sc = spark.sparkContext\n",
+    "\n",
+    "def readTiff(name: String): SinglebandGeoTiff = SinglebandGeoTiff(s\"../samples/$name\")\n",
+    "val filenamePattern = \"L8-B%d-Elkton-VA.tiff\""
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "bandsToJoin: (bands: Seq[Int])astraea.spark.rasterframes.RasterFrame\n"
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def bandsToJoin(bands: Seq[Int]) = bands.\n",
+    "  map { b ⇒ (b, filenamePattern.format(b)) }.\n",
+    "  map { case (b, f) ⇒ ((b - 1) % 3, readTiff(f)) }.\n",
+    "  map { case (b, t) ⇒ t.projectedRaster.toRF(s\"col_$b\") }.\n",
+    "  reduce(_ spatialJoin _)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Create a contrived example of columns with multiple tiles. Bands 1,4,7 are in col_0, 2,5,8 are in col_1, and 3,6,9 are in col_2."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "bands1: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct<col: int, row: int>, col_0: rf_tile ... 2 more fields]\n",
+       "bands2: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct<col: int, row: int>, col_0: rf_tile ... 2 more fields]\n",
+       "bands3: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct<col: int, row: int>, col_0: rf_tile ... 2 more fields]\n",
+       "grouped: org.apache.spark.sql.Dataset[org.apache.spark.sql.Row] = [spatial_key: struct<col: int, row: int>, col_0: rf_tile ... 2 more fields]\n"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val bands1 = bandsToJoin(Seq(1,2,3))\n",
+    "val bands2 = bandsToJoin(Seq(4,5,6))\n",
+    "val bands3 = bandsToJoin(Seq(7,8,9))\n",
+    "val grouped = bands1.union(bands2).union(bands3)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Compute statistics based on aggregates of tiles. These are all column-wise operations, so `aggMean` computes the average of all cells of all tiles in a certain column, returning a scalar. This is in contrast to local functions like `localAggMean`, which would return a tile where every cell is the mean of the corresponding input cells."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+-----------------+\n",
+      "|  agg_mean(col_0)|\n",
+      "+-----------------+\n",
+      "|8549.990636465822|\n",
+      "+-----------------+\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "grouped.select(aggMean($\"col_0\")).show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`aggDataCells` returns the number of cells in a column of tiles that are not NODATA. `aggNoDataCells` does the exact opposite, returning the number of NODATA cells."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+---------------------+\n",
+      "|agg_data_cells(col_1)|\n",
+      "+---------------------+\n",
+      "|               187895|\n",
+      "+---------------------+\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "grouped.select(aggDataCells($\"col_1\")).show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Local aggregate functions\n",
+    "Local functions operate on a cell-by-cell basis. For instance, `localAggMax` examines every tile in a column and the output cells are each the maximum of the number (in this case, three) of values that it sees. The output is a tile with every cell as the maximum of the corresponding cells "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "import geotrellis.raster._\n",
+       "array1: Array[Int] = Array(1, 2, 3, 4, 5, 6, 7, 8, 9)\n",
+       "tile1: geotrellis.raster.Tile = IntConstantNoDataArrayTile([I@23244250,3,3)\n",
+       "array2: Array[Int] = Array(9, 8, 7, 6, 5, 4, 3, 2, 1)\n",
+       "tile2: geotrellis.raster.Tile = IntConstantNoDataArrayTile([I@1fc7d568,3,3)\n",
+       "array3: Array[Int] = Array(5, 5, 5, 5, 5, 5, 5, 5, 5)\n",
+       "tile3: geotrellis.raster.Tile = IntConstantNoDataArrayTile([I@1146be39,3,3)\n"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import geotrellis.raster._\n",
+    "val array1: Array[Int] = (1 to 9).toArray\n",
+    "val tile1: Tile = IntArrayTile(array1, 3, 3)\n",
+    "val array2: Array[Int] = (9 to 1 by -1).toArray\n",
+    "val tile2: Tile = IntArrayTile(array2, 3, 3)\n",
+    "val array3: Array[Int] = Array.fill(9)(5)\n",
+    "val tile3: Tile = IntArrayTile(array3, 3, 3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "df: org.apache.spark.sql.DataFrame = [tiles: rf_tile]\n"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val df = sc.parallelize(Seq(tile1, tile2, tile3)).toDF(\"tiles\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "For instance, since each tile is filled with data cells, the result of aggregating a count of them is that each cell contains three, one for each tile aggregated over. `localAggNoDataCells` works in the same way."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+-------------------+---------+\n",
+      "|stats              |bins     |\n",
+      "+-------------------+---------+\n",
+      "|[9,3.0,3.0,3.0,0.0]|[[3.0,9]]|\n",
+      "+-------------------+---------+\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "df.select(tileHistogram(localAggDataCells($\"tiles\"))).show(false)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Functions also exist for finding the aggregated max, mean, and min"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+-----------------------------------------------------------------------------------------------------------------------------------------------------+\n",
+      "|UDF(localtileopaggregatefunction(tiles, astraea.spark.rasterframes.functions.LocalTileOpAggregateFunction@3a833ef9, 0, 0) AS localAggMax(tiles)#1016)|\n",
+      "+-----------------------------------------------------------------------------------------------------------------------------------------------------+\n",
+      "|     9     8     7\n",
+      "     6     5     6\n",
+      "     7     8     9\n",
+      "\n",
+      "                                                                                           |\n",
+      "+-----------------------------------------------------------------------------------------------------------------------------------------------------+\n",
+      "\n",
+      "+-------------------------------------------------------------------------------------------------------------------------------------------------+\n",
+      "|UDF(localmeanaggregatefunction(tiles, astraea.spark.rasterframes.functions.LocalMeanAggregateFunction@b027291, 0, 0) AS localAggMean(tiles)#1062)|\n",
+      "+-------------------------------------------------------------------------------------------------------------------------------------------------+\n",
+      "|     5     5     5\n",
+      "     5     5     5\n",
+      "     5     5     5\n",
+      "\n",
+      "                                                                                       |\n",
+      "+-------------------------------------------------------------------------------------------------------------------------------------------------+\n",
+      "\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "showTile: org.apache.spark.sql.expressions.UserDefinedFunction = UserDefinedFunction(<function1>,StringType,Some(List(org.apache.spark.sql.gt.types.TileUDT@26a0d48)))\n"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val showTile = udf((t: Tile) => t.asciiDraw())\n",
+    "df.select(showTile(localAggMax($\"tiles\"))).show(false)\n",
+    "df.select(showTile(localAggMean($\"tiles\"))).show(false)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`localAggStats` will return a structure with columns representing a variety of different tile-wise aggregate statistics."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+--------------------+--------------------+--------------------+--------------------+--------------------+\n",
+      "|               count|                 min|                 max|                mean|            variance|\n",
+      "+--------------------+--------------------+--------------------+--------------------+--------------------+\n",
+      "|IntUserDefinedNoD...|IntConstantNoData...|IntConstantNoData...|DoubleConstantNoD...|DoubleConstantNoD...|\n",
+      "+--------------------+--------------------+--------------------+--------------------+--------------------+\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "df.select(localAggStats($\"tiles\") as \"stats\").select(\"stats.*\").show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "spylon-kernel",
+   "language": "scala",
+   "name": "spylon-kernel"
+  },
+  "language_info": {
+   "codemirror_mode": "text/x-scala",
+   "file_extension": ".scala",
+   "help_links": [
+    {
+     "text": "MetaKernel Magics",
+     "url": "https://github.com/calysto/metakernel/blob/master/metakernel/magics/README.md"
+    }
+   ],
+   "mimetype": "text/x-scala",
+   "name": "scala",
+   "pygments_lexer": "scala",
+   "version": "0.4.1"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

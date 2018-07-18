@@ -1,0 +1,858 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Classification &#8212; rasterframes-book  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="section" id="Classification">
+<h1>Classification<a class="headerlink" href="#Classification" title="Permalink to this headline">¶</a></h1>
+<p>In this example we will do some simple cell classification based on
+multiband imagery and a target/label raster. As a part of the process
+we’ll explore the cross-validation support in SparkML.</p>
+<div class="section" id="Setup">
+<h2>Setup<a class="headerlink" href="#Setup" title="Permalink to this headline">¶</a></h2>
+<p>First some setup:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">import</span> <span class="nn">astraea.spark.rasterframes._</span>
+<span class="k">import</span> <span class="nn">astraea.spark.rasterframes.ml.</span><span class="o">{</span><span class="nc">NoDataFilter</span><span class="o">,</span> <span class="nc">TileExploder</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">geotrellis.raster._</span>
+<span class="k">import</span> <span class="nn">geotrellis.raster.render._</span>
+<span class="k">import</span> <span class="nn">geotrellis.raster.io.geotiff.SinglebandGeoTiff</span>
+<span class="k">import</span> <span class="nn">org.apache.spark.ml.Pipeline</span>
+<span class="k">import</span> <span class="nn">org.apache.spark.ml.classification.DecisionTreeClassifier</span>
+<span class="k">import</span> <span class="nn">org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator</span>
+<span class="k">import</span> <span class="nn">org.apache.spark.ml.feature.VectorAssembler</span>
+<span class="k">import</span> <span class="nn">org.apache.spark.ml.tuning.</span><span class="o">{</span><span class="nc">CrossValidator</span><span class="o">,</span> <span class="nc">ParamGridBuilder</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">org.apache.spark.sql._</span>
+
+<span class="k">implicit</span> <span class="k">val</span> <span class="n">spark</span> <span class="k">=</span> <span class="nc">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">().</span>
+  <span class="n">master</span><span class="o">(</span><span class="s">&quot;local[*]&quot;</span><span class="o">).</span><span class="n">appName</span><span class="o">(</span><span class="n">getClass</span><span class="o">.</span><span class="n">getName</span><span class="o">).</span><span class="n">getOrCreate</span><span class="o">().</span><span class="n">withRasterFrames</span>
+<span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">setLogLevel</span><span class="o">(</span><span class="s">&quot;ERROR&quot;</span><span class="o">)</span>
+
+<span class="k">import</span> <span class="nn">spark.implicits._</span>
+
+<span class="c1">// Utility for reading imagery from our test data set</span>
+<span class="k">def</span> <span class="n">readTiff</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">SinglebandGeoTiff</span> <span class="o">=</span> <span class="nc">SinglebandGeoTiff</span><span class="o">(</span><span class="s">s&quot;../samples/</span><span class="si">$name</span><span class="s">&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>Intitializing Scala interpreter ...
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>Spark Web UI available at http://172.18.0.2:4040
+SparkContext available as &#39;sc&#39; (version = 2.2.0, master = local[*], app id = local-1531418414217)
+SparkSession available as &#39;spark&#39;
+
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[1]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>import astraea.spark.rasterframes._
+import astraea.spark.rasterframes.ml.{NoDataFilter, TileExploder}
+import geotrellis.raster._
+import geotrellis.raster.render._
+import geotrellis.raster.io.geotiff.SinglebandGeoTiff
+import org.apache.spark.ml.Pipeline
+import org.apache.spark.ml.classification.DecisionTreeClassifier
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
+import org.apache.spark.ml.feature.VectorAssembler
+import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
+import org.apache.spark.sql._
+spark: org.apache.spark.sql.SparkSession = org.apache.spark.sql.SparkSession@1ace1dbe
+import spark.implicits._
+readTiff: (name: String)geotrellis.raster.io.geotiff.SinglebandGeoTiff
+
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Loading-Data">
+<h2>Loading Data<a class="headerlink" href="#Loading-Data" title="Permalink to this headline">¶</a></h2>
+<p>The first step is to load multiple bands of imagery and construct a
+single RasterFrame from them. To do this we:</p>
+<ol class="arabic simple">
+<li>Identify the GeoTIFF filename.</li>
+<li>Read the TIFF raster</li>
+<li>Convert to a raster frame of <code class="docutils literal"><span class="pre">tileSize</span></code> sized tiles, with an
+appropriate column name</li>
+<li>Use the RasterFrames <code class="docutils literal"><span class="pre">spatialJoin</span></code> function to create a new
+RasterFrame with a column for each band</li>
+</ol>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">filenamePattern</span> <span class="k">=</span> <span class="s">&quot;L8-%s-Elkton-VA.tiff&quot;</span>
+<span class="k">val</span> <span class="n">bandNumbers</span> <span class="k">=</span> <span class="mi">2</span> <span class="n">to</span> <span class="mi">7</span>
+<span class="k">val</span> <span class="n">bandColNames</span> <span class="k">=</span> <span class="n">bandNumbers</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">b</span> <span class="k">⇒</span> <span class="s">s&quot;band_</span><span class="si">$b</span><span class="s">&quot;</span><span class="o">).</span><span class="n">toArray</span>
+<span class="k">val</span> <span class="n">tileSize</span> <span class="k">=</span> <span class="mi">10</span>
+
+<span class="c1">// For each identified band, load the associated image file</span>
+<span class="k">val</span> <span class="n">joinedRF</span> <span class="k">=</span> <span class="n">bandNumbers</span><span class="o">.</span>
+  <span class="n">map</span> <span class="o">{</span> <span class="n">b</span> <span class="k">⇒</span> <span class="o">(</span><span class="n">b</span><span class="o">,</span> <span class="n">filenamePattern</span><span class="o">.</span><span class="n">format</span><span class="o">(</span><span class="s">&quot;B&quot;</span> <span class="o">+</span> <span class="n">b</span><span class="o">))</span> <span class="o">}.</span>
+  <span class="n">map</span> <span class="o">{</span> <span class="k">case</span> <span class="o">(</span><span class="n">b</span><span class="o">,</span> <span class="n">f</span><span class="o">)</span> <span class="k">⇒</span> <span class="o">(</span><span class="n">b</span><span class="o">,</span> <span class="n">readTiff</span><span class="o">(</span><span class="n">f</span><span class="o">))</span> <span class="o">}.</span>
+  <span class="n">map</span> <span class="o">{</span> <span class="k">case</span> <span class="o">(</span><span class="n">b</span><span class="o">,</span> <span class="n">t</span><span class="o">)</span> <span class="k">⇒</span> <span class="n">t</span><span class="o">.</span><span class="n">projectedRaster</span><span class="o">.</span><span class="n">toRF</span><span class="o">(</span><span class="n">tileSize</span><span class="o">,</span> <span class="n">tileSize</span><span class="o">,</span> <span class="s">s&quot;band_</span><span class="si">$b</span><span class="s">&quot;</span><span class="o">)</span> <span class="o">}.</span>
+  <span class="n">reduce</span><span class="o">(</span><span class="k">_</span> <span class="n">spatialJoin</span> <span class="k">_</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[2]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>filenamePattern: String = L8-%s-Elkton-VA.tiff
+bandNumbers: scala.collection.immutable.Range.Inclusive = Range(2, 3, 4, 5, 6, 7)
+bandColNames: Array[String] = Array(band_2, band_3, band_4, band_5, band_6, band_7)
+tileSize: Int = 10
+joinedRF: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile ... 5 more fields]
+
+</pre></div>
+</div>
+</div>
+<p>We should see a single <code class="docutils literal"><span class="pre">spatial_key</span></code> column along with 6 columns of
+tiles.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="n">joinedRF</span><span class="o">.</span><span class="n">printSchema</span><span class="o">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+root
+ |-- spatial_key: struct (nullable = true)
+ |    |-- col: integer (nullable = false)
+ |    |-- row: integer (nullable = false)
+ |-- band_2: rf_tile (nullable = true)
+ |-- band_3: rf_tile (nullable = true)
+ |-- band_4: rf_tile (nullable = true)
+ |-- band_5: rf_tile (nullable = true)
+ |-- band_6: rf_tile (nullable = true)
+ |-- band_7: rf_tile (nullable = true)
+
+</pre></div></div>
+</div>
+<p>Similarly pull we pull in the target label data. When load the target
+label raster we have to convert the cell type to <code class="docutils literal"><span class="pre">Double</span></code> to meet
+expectations of SparkML.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">targetCol</span> <span class="k">=</span> <span class="s">&quot;target&quot;</span>
+
+<span class="k">val</span> <span class="n">target</span> <span class="k">=</span> <span class="n">readTiff</span><span class="o">(</span><span class="n">filenamePattern</span><span class="o">.</span><span class="n">format</span><span class="o">(</span><span class="s">&quot;Labels&quot;</span><span class="o">)).</span>
+  <span class="n">mapTile</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">convert</span><span class="o">(</span><span class="nc">DoubleConstantNoDataCellType</span><span class="o">)).</span>
+  <span class="n">projectedRaster</span><span class="o">.</span>
+  <span class="n">toRF</span><span class="o">(</span><span class="n">tileSize</span><span class="o">,</span> <span class="n">tileSize</span><span class="o">,</span> <span class="n">targetCol</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[4]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>targetCol: String = target
+target: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct&lt;col: int, row: int&gt;, target: rf_tile]
+
+</pre></div>
+</div>
+</div>
+<p>Take a peek at what kind of label data we have to work with.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="n">target</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="n">aggStats</span><span class="o">(</span><span class="n">target</span><span class="o">(</span><span class="n">targetCol</span><span class="o">))).</span><span class="n">show</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++---------+-----------+---+---+------------------+------------------+
+|dataCells|noDataCells|min|max|              mean|          variance|
++---------+-----------+---+---+------------------+------------------+
+|     1626|      30674|0.0|2.0|0.8031980319803198|0.2798421711154381|
++---------+-----------+---+---+------------------+------------------+
+
+</pre></div></div>
+</div>
+<p>Join the target label RasterFrame with the band tiles to create our
+analytics base table</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">abt</span> <span class="k">=</span> <span class="n">joinedRF</span><span class="o">.</span><span class="n">spatialJoin</span><span class="o">(</span><span class="n">target</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[6]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>abt: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile ... 6 more fields]
+
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="ML-Pipeline">
+<h2>ML Pipeline<a class="headerlink" href="#ML-Pipeline" title="Permalink to this headline">¶</a></h2>
+<p>The data preparation modeling pipeline is next. SparkML requires that
+each observation be in its own row, and those observations be packed
+into a single <code class="docutils literal"><span class="pre">Vector</span></code> type. The first step is to “explode” the tiles
+into a single row per cell/pixel. Then we filter out any rows that have
+<code class="docutils literal"><span class="pre">NoData</span></code> values (which will cause an error during training). Finally
+we use the SparkML <code class="docutils literal"><span class="pre">VectorAssembler</span></code> to create that <code class="docutils literal"><span class="pre">Vector</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">exploder</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">TileExploder</span><span class="o">()</span>
+
+<span class="k">val</span> <span class="n">noDataFilter</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">NoDataFilter</span><span class="o">().</span>
+  <span class="n">setInputCols</span><span class="o">(</span><span class="n">bandColNames</span> <span class="o">:+</span> <span class="n">targetCol</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">assembler</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">VectorAssembler</span><span class="o">().</span>
+  <span class="n">setInputCols</span><span class="o">(</span><span class="n">bandColNames</span><span class="o">).</span>
+  <span class="n">setOutputCol</span><span class="o">(</span><span class="s">&quot;features&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[7]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>exploder: astraea.spark.rasterframes.ml.TileExploder = tile-exploder_a09463748e7e
+noDataFilter: astraea.spark.rasterframes.ml.NoDataFilter = nodata-filter_737b72a5fa90
+assembler: org.apache.spark.ml.feature.VectorAssembler = vecAssembler_d990d5fd10d4
+
+</pre></div>
+</div>
+</div>
+<p>We are going to use a decision tree for classification. You can swap out
+one of the other multi-class classification algorithms if you like. With
+the algorithm selected we can assemble our modeling pipeline.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">classifier</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">DecisionTreeClassifier</span><span class="o">().</span>
+  <span class="n">setLabelCol</span><span class="o">(</span><span class="n">targetCol</span><span class="o">).</span>
+  <span class="n">setFeaturesCol</span><span class="o">(</span><span class="n">assembler</span><span class="o">.</span><span class="n">getOutputCol</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">pipeline</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Pipeline</span><span class="o">().</span>
+  <span class="n">setStages</span><span class="o">(</span><span class="nc">Array</span><span class="o">(</span><span class="n">exploder</span><span class="o">,</span> <span class="n">noDataFilter</span><span class="o">,</span> <span class="n">assembler</span><span class="o">,</span> <span class="n">classifier</span><span class="o">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[8]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>classifier: org.apache.spark.ml.classification.DecisionTreeClassifier = dtc_02f2eace240c
+pipeline: org.apache.spark.ml.Pipeline = pipeline_a7f4e14af659
+
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Cross-Validation">
+<h2>Cross Validation<a class="headerlink" href="#Cross-Validation" title="Permalink to this headline">¶</a></h2>
+<p>To extend the sophistication of the example we are going to use the
+SparkML support for cross-validation and hyper-parameter tuning. The
+first step is to configure how we’re going to evaluate our model’s
+performance. Then we define the hyperparmeter(s) we’re going to vary and
+evaluate. Finally we configure the cross validator.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">evaluator</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">MulticlassClassificationEvaluator</span><span class="o">().</span>
+  <span class="n">setLabelCol</span><span class="o">(</span><span class="n">targetCol</span><span class="o">).</span>
+  <span class="n">setPredictionCol</span><span class="o">(</span><span class="s">&quot;prediction&quot;</span><span class="o">).</span>
+  <span class="n">setMetricName</span><span class="o">(</span><span class="s">&quot;accuracy&quot;</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">paramGrid</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ParamGridBuilder</span><span class="o">().</span>
+  <span class="n">addGrid</span><span class="o">(</span><span class="n">classifier</span><span class="o">.</span><span class="n">maxDepth</span><span class="o">,</span> <span class="nc">Array</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">4</span><span class="o">)).</span>
+  <span class="n">build</span><span class="o">()</span>
+
+<span class="k">val</span> <span class="n">trainer</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">CrossValidator</span><span class="o">().</span>
+  <span class="n">setEstimator</span><span class="o">(</span><span class="n">pipeline</span><span class="o">).</span>
+  <span class="n">setEvaluator</span><span class="o">(</span><span class="n">evaluator</span><span class="o">).</span>
+  <span class="n">setEstimatorParamMaps</span><span class="o">(</span><span class="n">paramGrid</span><span class="o">).</span>
+  <span class="n">setNumFolds</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[9]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>evaluator: org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator = mcEval_d26c094dede9
+paramGrid: Array[org.apache.spark.ml.param.ParamMap] =
+Array({
+    dtc_02f2eace240c-maxDepth: 2
+}, {
+    dtc_02f2eace240c-maxDepth: 3
+}, {
+    dtc_02f2eace240c-maxDepth: 4
+})
+trainer: org.apache.spark.ml.tuning.CrossValidator = cv_89adac43c56f
+
+</pre></div>
+</div>
+</div>
+<p>Push the “go” button:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">model</span> <span class="k">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">fit</span><span class="o">(</span><span class="n">abt</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[10]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>model: org.apache.spark.ml.tuning.CrossValidatorModel = cv_89adac43c56f
+
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Model-Evaluation">
+<h2>Model Evaluation<a class="headerlink" href="#Model-Evaluation" title="Permalink to this headline">¶</a></h2>
+<p>To view the model’s performance we format the <code class="docutils literal"><span class="pre">paramGrid</span></code> settings
+used for each model and render the parameter/performance association.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">metrics</span> <span class="k">=</span> <span class="n">model</span><span class="o">.</span><span class="n">getEstimatorParamMaps</span><span class="o">.</span>
+  <span class="n">map</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">toSeq</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">p</span> <span class="k">⇒</span> <span class="s">s&quot;</span><span class="si">${</span><span class="n">p</span><span class="o">.</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s"> = </span><span class="si">${</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s">&quot;</span><span class="o">)).</span>
+  <span class="n">map</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">mkString</span><span class="o">(</span><span class="s">&quot;, &quot;</span><span class="o">)).</span>
+  <span class="n">zip</span><span class="o">(</span><span class="n">model</span><span class="o">.</span><span class="n">avgMetrics</span><span class="o">)</span>
+
+<span class="n">metrics</span><span class="o">.</span><span class="n">toSeq</span><span class="o">.</span><span class="n">toDF</span><span class="o">(</span><span class="s">&quot;params&quot;</span><span class="o">,</span> <span class="s">&quot;metric&quot;</span><span class="o">).</span><span class="n">show</span><span class="o">(</span><span class="kc">false</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++------------+------------------+
+|params      |metric            |
++------------+------------------+
+|maxDepth = 2|0.9612720982887348|
+|maxDepth = 3|0.9850291835043165|
+|maxDepth = 4|0.9856287038880095|
++------------+------------------+
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[11]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>metrics: Array[(String, Double)] = Array((maxDepth = 2,0.9612720982887348), (maxDepth = 3,0.9850291835043165), (maxDepth = 4,0.9856287038880095))
+
+</pre></div>
+</div>
+</div>
+<p>Finally, we score the original data set (including the cells without
+target values) and add up class membership results.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">scored</span> <span class="k">=</span> <span class="n">model</span><span class="o">.</span><span class="n">bestModel</span><span class="o">.</span><span class="n">transform</span><span class="o">(</span><span class="n">joinedRF</span><span class="o">)</span>
+
+<span class="n">scored</span><span class="o">.</span><span class="n">groupBy</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;prediction&quot;</span> <span class="n">as</span> <span class="s">&quot;class&quot;</span><span class="o">).</span><span class="n">count</span><span class="o">().</span><span class="n">show</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-----+-----+
+|class|count|
++-----+-----+
+|  0.0| 7181|
+|  1.0|14851|
+|  2.0| 9402|
++-----+-----+
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[12]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>scored: org.apache.spark.sql.DataFrame = [spatial_key: struct&lt;col: int, row: int&gt;, column_index: int ... 11 more fields]
+
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Visualizing-Results">
+<h2>Visualizing Results<a class="headerlink" href="#Visualizing-Results" title="Permalink to this headline">¶</a></h2>
+<p>The predictions are in a DataFrame with each row representing a separate
+pixel. To assemble a raster to visualize the class assignments, we have
+to go through a multi-stage process to get the data back in tile form,
+and from there to combined raster form.</p>
+<p>First, we get the DataFrame back into RasterFrame form:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">tlm</span> <span class="k">=</span> <span class="n">joinedRF</span><span class="o">.</span><span class="n">tileLayerMetadata</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">get</span>
+
+<span class="k">val</span> <span class="n">retiled</span> <span class="k">=</span> <span class="n">scored</span><span class="o">.</span><span class="n">groupBy</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;spatial_key&quot;</span><span class="o">).</span><span class="n">agg</span><span class="o">(</span>
+  <span class="n">assembleTile</span><span class="o">(</span>
+    <span class="n">$</span><span class="s">&quot;column_index&quot;</span><span class="o">,</span> <span class="n">$</span><span class="s">&quot;row_index&quot;</span><span class="o">,</span> <span class="n">$</span><span class="s">&quot;prediction&quot;</span><span class="o">,</span>
+    <span class="n">tlm</span><span class="o">.</span><span class="n">tileCols</span><span class="o">,</span> <span class="n">tlm</span><span class="o">.</span><span class="n">tileRows</span><span class="o">,</span> <span class="nc">ByteConstantNoDataCellType</span>
+  <span class="o">)</span>
+<span class="o">)</span>
+
+<span class="k">val</span> <span class="n">rf</span> <span class="k">=</span> <span class="n">retiled</span><span class="o">.</span><span class="n">asRF</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;spatial_key&quot;</span><span class="o">,</span> <span class="n">tlm</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[14]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>tlm: geotrellis.spark.TileLayerMetadata[geotrellis.spark.SpatialKey] = TileLayerMetadata(uint16raw,GridExtent(Extent(703986.502389, 4249521.736659763, 709668.7192613656, 4254601.8671),29.906404591397703,29.88312023668824),Extent(703986.502389, 4249551.61978, 709549.093643, 4254601.8671),utm-CS,KeyBounds(SpatialKey(0,0),SpatialKey(18,16)))
+retiled: org.apache.spark.sql.DataFrame = [spatial_key: struct&lt;col: int, row: int&gt;, prediction: rf_tile]
+rf: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct&lt;col: int, row: int&gt;, prediction: rf_tile]
+
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="n">tlm</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[15]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>res4: geotrellis.spark.TileLayerMetadata[geotrellis.spark.SpatialKey] = TileLayerMetadata(uint16raw,GridExtent(Extent(703986.502389, 4249521.736659763, 709668.7192613656, 4254601.8671),29.906404591397703,29.88312023668824),Extent(703986.502389, 4249551.61978, 709549.093643, 4254601.8671),utm-CS,KeyBounds(SpatialKey(0,0),SpatialKey(18,16)))
+
+</pre></div>
+</div>
+</div>
+<p>To render our visualization, we convert to a raster first, and then use
+an <code class="docutils literal"><span class="pre">IndexedColorMap</span></code> to assign each discrete class a different color,
+and finally rendering to a PNG file.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">raster</span> <span class="k">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">toRaster</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;prediction&quot;</span><span class="o">,</span> <span class="mi">186</span><span class="o">,</span> <span class="mi">169</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">clusterColors</span> <span class="k">=</span> <span class="nc">IndexedColorMap</span><span class="o">.</span><span class="n">fromColorMap</span><span class="o">(</span>
+  <span class="nc">ColorRamps</span><span class="o">.</span><span class="nc">Viridis</span><span class="o">.</span><span class="n">toColorMap</span><span class="o">((</span><span class="mi">0</span> <span class="n">until</span> <span class="mi">3</span><span class="o">).</span><span class="n">toArray</span><span class="o">)</span>
+<span class="o">)</span>
+
+<span class="n">raster</span><span class="o">.</span><span class="n">tile</span><span class="o">.</span><span class="n">renderPng</span><span class="o">(</span><span class="n">clusterColors</span><span class="o">).</span><span class="n">write</span><span class="o">(</span><span class="s">&quot;outputs/classified.png&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[14]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>raster: geotrellis.raster.ProjectedRaster[geotrellis.raster.Tile] = ProjectedRaster(Raster(CroppedTile(ByteConstantNoDataArrayTile([B@51c54466,372,338),GridBounds(0,0,185,168)),Extent(703986.502389, 4249551.61978, 709549.093643, 4254601.8671)),utm-CS)
+clusterColors: geotrellis.raster.render.IndexedColorMap = IndexedColorMap(0x440154ff, 0x21918cff, 0xfde725ff)
+
+</pre></div>
+</div>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="30%" />
+<col width="37%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Color Composite</th>
+<th class="head">Target Labels</th>
+<th class="head">Class Assignments</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><img alt="image0" src="notebooks/Scala/outputs/L8-RGB-VA.png" /></td>
+<td><img alt="image1" src="notebooks/Scala/outputs/target-labels.png" /></td>
+<td><img alt="image2" src="../../_images/classified.png" /></td>
+</tr>
+</tbody>
+</table>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">raster</span> <span class="k">=</span> <span class="nc">SinglebandGeoTiff</span><span class="o">(</span><span class="s">&quot;../samples/L8-Labels-Elkton-VA.tiff&quot;</span><span class="o">).</span><span class="n">raster</span>
+
+<span class="k">val</span> <span class="n">k</span> <span class="k">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">findMinMax</span><span class="o">.</span><span class="n">_2</span>
+
+<span class="k">val</span> <span class="n">clusterColors</span> <span class="k">=</span> <span class="nc">IndexedColorMap</span><span class="o">.</span><span class="n">fromColorMap</span><span class="o">(</span>
+  <span class="nc">ColorRamps</span><span class="o">.</span><span class="nc">Viridis</span><span class="o">.</span><span class="n">toColorMap</span><span class="o">((</span><span class="mi">0</span> <span class="n">to</span> <span class="n">k</span><span class="o">).</span><span class="n">toArray</span><span class="o">)</span>
+<span class="o">)</span>
+
+<span class="n">raster</span><span class="o">.</span><span class="n">tile</span><span class="o">.</span><span class="n">renderPng</span><span class="o">(</span><span class="n">clusterColors</span><span class="o">).</span><span class="n">write</span><span class="o">(</span><span class="s">&quot;outputs/target-labels.png&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[15]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>raster: geotrellis.raster.Raster[geotrellis.raster.Tile] = Raster(UByteUserDefinedNoDataArrayTile([B@1bb9d6bd,186,169,uint8ud255),Extent(703986.502389, 4249551.61978, 709549.093643, 4254601.8671))
+k: Int = 2
+clusterColors: geotrellis.raster.render.IndexedColorMap = IndexedColorMap(0x440154ff, 0x21918cff, 0xfde725ff)
+
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, James Nachbar.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../../_sources/notebooks/Scala/classification-scala.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

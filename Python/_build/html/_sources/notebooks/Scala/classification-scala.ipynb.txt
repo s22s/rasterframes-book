@@ -1,0 +1,685 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Classification\n",
+    "\n",
+    "In this example we will do some simple cell classification based on multiband imagery and a\n",
+    "target/label raster. As a part of the process we'll explore the cross-validation support in\n",
+    "SparkML.\n",
+    "\n",
+    "## Setup\n",
+    "\n",
+    "First some setup:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Intitializing Scala interpreter ..."
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "text/plain": [
+       "Spark Web UI available at http://172.18.0.2:4040\n",
+       "SparkContext available as 'sc' (version = 2.2.0, master = local[*], app id = local-1531418414217)\n",
+       "SparkSession available as 'spark'\n"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "text/plain": [
+       "import astraea.spark.rasterframes._\n",
+       "import astraea.spark.rasterframes.ml.{NoDataFilter, TileExploder}\n",
+       "import geotrellis.raster._\n",
+       "import geotrellis.raster.render._\n",
+       "import geotrellis.raster.io.geotiff.SinglebandGeoTiff\n",
+       "import org.apache.spark.ml.Pipeline\n",
+       "import org.apache.spark.ml.classification.DecisionTreeClassifier\n",
+       "import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator\n",
+       "import org.apache.spark.ml.feature.VectorAssembler\n",
+       "import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}\n",
+       "import org.apache.spark.sql._\n",
+       "spark: org.apache.spark.sql.SparkSession = org.apache.spark.sql.SparkSession@1ace1dbe\n",
+       "import spark.implicits._\n",
+       "readTiff: (name: String)geotrellis.raster.io.geotiff.SinglebandGeoTiff\n"
+      ]
+     },
+     "execution_count": 1,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import astraea.spark.rasterframes._\n",
+    "import astraea.spark.rasterframes.ml.{NoDataFilter, TileExploder}\n",
+    "import geotrellis.raster._\n",
+    "import geotrellis.raster.render._\n",
+    "import geotrellis.raster.io.geotiff.SinglebandGeoTiff\n",
+    "import org.apache.spark.ml.Pipeline\n",
+    "import org.apache.spark.ml.classification.DecisionTreeClassifier\n",
+    "import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator\n",
+    "import org.apache.spark.ml.feature.VectorAssembler\n",
+    "import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}\n",
+    "import org.apache.spark.sql._\n",
+    "\n",
+    "implicit val spark = SparkSession.builder().\n",
+    "  master(\"local[*]\").appName(getClass.getName).getOrCreate().withRasterFrames\n",
+    "spark.sparkContext.setLogLevel(\"ERROR\")\n",
+    "\n",
+    "import spark.implicits._\n",
+    "\n",
+    "// Utility for reading imagery from our test data set\n",
+    "def readTiff(name: String): SinglebandGeoTiff = SinglebandGeoTiff(s\"../samples/$name\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Loading Data\n",
+    "\n",
+    "The first step is to load multiple bands of imagery and construct a single RasterFrame from them.\n",
+    "To do this we:\n",
+    "\n",
+    "1. Identify the GeoTIFF filename. \n",
+    "2. Read the TIFF raster\n",
+    "3. Convert to a raster frame of `tileSize` sized tiles, with an appropriate column name\n",
+    "4. Use the RasterFrames `spatialJoin` function to create a new RasterFrame with a column for each band\n",
+    " "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "filenamePattern: String = L8-%s-Elkton-VA.tiff\n",
+       "bandNumbers: scala.collection.immutable.Range.Inclusive = Range(2, 3, 4, 5, 6, 7)\n",
+       "bandColNames: Array[String] = Array(band_2, band_3, band_4, band_5, band_6, band_7)\n",
+       "tileSize: Int = 10\n",
+       "joinedRF: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct<col: int, row: int>, band_2: rf_tile ... 5 more fields]\n"
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val filenamePattern = \"L8-%s-Elkton-VA.tiff\"\n",
+    "val bandNumbers = 2 to 7\n",
+    "val bandColNames = bandNumbers.map(b ⇒ s\"band_$b\").toArray\n",
+    "val tileSize = 10\n",
+    "\n",
+    "// For each identified band, load the associated image file\n",
+    "val joinedRF = bandNumbers.\n",
+    "  map { b ⇒ (b, filenamePattern.format(\"B\" + b)) }.\n",
+    "  map { case (b, f) ⇒ (b, readTiff(f)) }.\n",
+    "  map { case (b, t) ⇒ t.projectedRaster.toRF(tileSize, tileSize, s\"band_$b\") }.\n",
+    "  reduce(_ spatialJoin _)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We should see a single `spatial_key` column along with 6 columns of tiles."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "root\n",
+      " |-- spatial_key: struct (nullable = true)\n",
+      " |    |-- col: integer (nullable = false)\n",
+      " |    |-- row: integer (nullable = false)\n",
+      " |-- band_2: rf_tile (nullable = true)\n",
+      " |-- band_3: rf_tile (nullable = true)\n",
+      " |-- band_4: rf_tile (nullable = true)\n",
+      " |-- band_5: rf_tile (nullable = true)\n",
+      " |-- band_6: rf_tile (nullable = true)\n",
+      " |-- band_7: rf_tile (nullable = true)\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "joinedRF.printSchema()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Similarly pull we pull in the target label data. When load the target label raster we have \n",
+    "to convert the cell type to `Double` to meet expectations of SparkML. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "targetCol: String = target\n",
+       "target: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct<col: int, row: int>, target: rf_tile]\n"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val targetCol = \"target\"\n",
+    "\n",
+    "val target = readTiff(filenamePattern.format(\"Labels\")).\n",
+    "  mapTile(_.convert(DoubleConstantNoDataCellType)).\n",
+    "  projectedRaster.\n",
+    "  toRF(tileSize, tileSize, targetCol)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Take a peek at what kind of label data we have to work with."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+---------+-----------+---+---+------------------+------------------+\n",
+      "|dataCells|noDataCells|min|max|              mean|          variance|\n",
+      "+---------+-----------+---+---+------------------+------------------+\n",
+      "|     1626|      30674|0.0|2.0|0.8031980319803198|0.2798421711154381|\n",
+      "+---------+-----------+---+---+------------------+------------------+\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "target.select(aggStats(target(targetCol))).show"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Join the target label RasterFrame with the band tiles to create our analytics base table"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "abt: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct<col: int, row: int>, band_2: rf_tile ... 6 more fields]\n"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val abt = joinedRF.spatialJoin(target)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## ML Pipeline\n",
+    "\n",
+    "The data preparation modeling pipeline is next. SparkML requires that each observation be in \n",
+    "its own row, and those observations be packed into a single `Vector` type. The first step is \n",
+    "to \"explode\" the tiles into a single row per cell/pixel. Then we filter out any rows that\n",
+    "have `NoData` values (which will cause an error during training). Finally we use the\n",
+    "SparkML `VectorAssembler` to create that `Vector`. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "exploder: astraea.spark.rasterframes.ml.TileExploder = tile-exploder_a09463748e7e\n",
+       "noDataFilter: astraea.spark.rasterframes.ml.NoDataFilter = nodata-filter_737b72a5fa90\n",
+       "assembler: org.apache.spark.ml.feature.VectorAssembler = vecAssembler_d990d5fd10d4\n"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val exploder = new TileExploder()\n",
+    "\n",
+    "val noDataFilter = new NoDataFilter().\n",
+    "  setInputCols(bandColNames :+ targetCol)\n",
+    "\n",
+    "val assembler = new VectorAssembler().\n",
+    "  setInputCols(bandColNames).\n",
+    "  setOutputCol(\"features\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We are going to use a decision tree for classification. You can swap out one of the other multi-class\n",
+    "classification algorithms if you like. With the algorithm selected we can assemble our modeling pipeline."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "classifier: org.apache.spark.ml.classification.DecisionTreeClassifier = dtc_02f2eace240c\n",
+       "pipeline: org.apache.spark.ml.Pipeline = pipeline_a7f4e14af659\n"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val classifier = new DecisionTreeClassifier().\n",
+    "  setLabelCol(targetCol).\n",
+    "  setFeaturesCol(assembler.getOutputCol)\n",
+    "\n",
+    "val pipeline = new Pipeline().\n",
+    "  setStages(Array(exploder, noDataFilter, assembler, classifier))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Cross Validation\n",
+    "\n",
+    "To extend the sophistication of the example we are going to use the SparkML support for \n",
+    "cross-validation and hyper-parameter tuning. The first step is to configure how we're \n",
+    "going to evaluate our model's performance. Then we define the hyperparmeter(s) we're going to \n",
+    "vary and evaluate. Finally we configure the cross validator. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "evaluator: org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator = mcEval_d26c094dede9\n",
+       "paramGrid: Array[org.apache.spark.ml.param.ParamMap] =\n",
+       "Array({\n",
+       "\tdtc_02f2eace240c-maxDepth: 2\n",
+       "}, {\n",
+       "\tdtc_02f2eace240c-maxDepth: 3\n",
+       "}, {\n",
+       "\tdtc_02f2eace240c-maxDepth: 4\n",
+       "})\n",
+       "trainer: org.apache.spark.ml.tuning.CrossValidator = cv_89adac43c56f\n"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val evaluator = new MulticlassClassificationEvaluator().\n",
+    "  setLabelCol(targetCol).\n",
+    "  setPredictionCol(\"prediction\").\n",
+    "  setMetricName(\"accuracy\")\n",
+    "\n",
+    "val paramGrid = new ParamGridBuilder().\n",
+    "  addGrid(classifier.maxDepth, Array(2, 3, 4)).\n",
+    "  build()\n",
+    "\n",
+    "val trainer = new CrossValidator().\n",
+    "  setEstimator(pipeline).\n",
+    "  setEvaluator(evaluator).\n",
+    "  setEstimatorParamMaps(paramGrid).\n",
+    "  setNumFolds(4)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Push the \"go\" button:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "model: org.apache.spark.ml.tuning.CrossValidatorModel = cv_89adac43c56f\n"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val model = trainer.fit(abt)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Model Evaluation\n",
+    "\n",
+    "To view the model's performance we format the `paramGrid` settings used for each model and \n",
+    "render the parameter/performance association."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+------------+------------------+\n",
+      "|params      |metric            |\n",
+      "+------------+------------------+\n",
+      "|maxDepth = 2|0.9612720982887348|\n",
+      "|maxDepth = 3|0.9850291835043165|\n",
+      "|maxDepth = 4|0.9856287038880095|\n",
+      "+------------+------------------+\n",
+      "\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "metrics: Array[(String, Double)] = Array((maxDepth = 2,0.9612720982887348), (maxDepth = 3,0.9850291835043165), (maxDepth = 4,0.9856287038880095))\n"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val metrics = model.getEstimatorParamMaps.\n",
+    "  map(_.toSeq.map(p ⇒ s\"${p.param.name} = ${p.value}\")).\n",
+    "  map(_.mkString(\", \")).\n",
+    "  zip(model.avgMetrics)\n",
+    "\n",
+    "metrics.toSeq.toDF(\"params\", \"metric\").show(false)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Finally, we score the original data set (including the cells without target values) and \n",
+    "add up class membership results."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+-----+-----+\n",
+      "|class|count|\n",
+      "+-----+-----+\n",
+      "|  0.0| 7181|\n",
+      "|  1.0|14851|\n",
+      "|  2.0| 9402|\n",
+      "+-----+-----+\n",
+      "\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "scored: org.apache.spark.sql.DataFrame = [spatial_key: struct<col: int, row: int>, column_index: int ... 11 more fields]\n"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val scored = model.bestModel.transform(joinedRF)\n",
+    "\n",
+    "scored.groupBy($\"prediction\" as \"class\").count().show"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Visualizing Results\n",
+    "\n",
+    "The predictions are in a DataFrame with each row representing a separate pixel. \n",
+    "To assemble a raster to visualize the class assignments, we have to go through a\n",
+    "multi-stage process to get the data back in tile form, and from there to combined\n",
+    "raster form.\n",
+    "\n",
+    "First, we get the DataFrame back into RasterFrame form:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tlm: geotrellis.spark.TileLayerMetadata[geotrellis.spark.SpatialKey] = TileLayerMetadata(uint16raw,GridExtent(Extent(703986.502389, 4249521.736659763, 709668.7192613656, 4254601.8671),29.906404591397703,29.88312023668824),Extent(703986.502389, 4249551.61978, 709549.093643, 4254601.8671),utm-CS,KeyBounds(SpatialKey(0,0),SpatialKey(18,16)))\n",
+       "retiled: org.apache.spark.sql.DataFrame = [spatial_key: struct<col: int, row: int>, prediction: rf_tile]\n",
+       "rf: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct<col: int, row: int>, prediction: rf_tile]\n"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val tlm = joinedRF.tileLayerMetadata.left.get\n",
+    "\n",
+    "val retiled = scored.groupBy($\"spatial_key\").agg(\n",
+    "  assembleTile(\n",
+    "    $\"column_index\", $\"row_index\", $\"prediction\",\n",
+    "    tlm.tileCols, tlm.tileRows, ByteConstantNoDataCellType\n",
+    "  )\n",
+    ")\n",
+    "\n",
+    "val rf = retiled.asRF($\"spatial_key\", tlm)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "res4: geotrellis.spark.TileLayerMetadata[geotrellis.spark.SpatialKey] = TileLayerMetadata(uint16raw,GridExtent(Extent(703986.502389, 4249521.736659763, 709668.7192613656, 4254601.8671),29.906404591397703,29.88312023668824),Extent(703986.502389, 4249551.61978, 709549.093643, 4254601.8671),utm-CS,KeyBounds(SpatialKey(0,0),SpatialKey(18,16)))\n"
+      ]
+     },
+     "execution_count": 15,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "tlm"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "To render our visualization, we convert to a raster first, and then use an\n",
+    "`IndexedColorMap` to assign each discrete class a different color, and finally\n",
+    "rendering to a PNG file."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "raster: geotrellis.raster.ProjectedRaster[geotrellis.raster.Tile] = ProjectedRaster(Raster(CroppedTile(ByteConstantNoDataArrayTile([B@51c54466,372,338),GridBounds(0,0,185,168)),Extent(703986.502389, 4249551.61978, 709549.093643, 4254601.8671)),utm-CS)\n",
+       "clusterColors: geotrellis.raster.render.IndexedColorMap = IndexedColorMap(0x440154ff, 0x21918cff, 0xfde725ff)\n"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val raster = rf.toRaster($\"prediction\", 186, 169)\n",
+    "\n",
+    "val clusterColors = IndexedColorMap.fromColorMap(\n",
+    "  ColorRamps.Viridis.toColorMap((0 until 3).toArray)\n",
+    ")\n",
+    "\n",
+    "raster.tile.renderPng(clusterColors).write(\"outputs/classified.png\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "| Color Composite    | Target Labels          | Class Assignments   |\n",
+    "| ------------------ | ---------------------- | ------------------- |\n",
+    "| ![](outputs/L8-RGB-VA.png) | ![](outputs/target-labels.png) | ![](outputs/classified.png) |"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "raster: geotrellis.raster.Raster[geotrellis.raster.Tile] = Raster(UByteUserDefinedNoDataArrayTile([B@1bb9d6bd,186,169,uint8ud255),Extent(703986.502389, 4249551.61978, 709549.093643, 4254601.8671))\n",
+       "k: Int = 2\n",
+       "clusterColors: geotrellis.raster.render.IndexedColorMap = IndexedColorMap(0x440154ff, 0x21918cff, 0xfde725ff)\n"
+      ]
+     },
+     "execution_count": 15,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val raster = SinglebandGeoTiff(\"../samples/L8-Labels-Elkton-VA.tiff\").raster\n",
+    "\n",
+    "val k = raster.findMinMax._2\n",
+    "\n",
+    "val clusterColors = IndexedColorMap.fromColorMap(\n",
+    "  ColorRamps.Viridis.toColorMap((0 to k).toArray)\n",
+    ")\n",
+    "\n",
+    "raster.tile.renderPng(clusterColors).write(\"outputs/target-labels.png\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "spylon-kernel",
+   "language": "scala",
+   "name": "spylon-kernel"
+  },
+  "language_info": {
+   "codemirror_mode": "text/x-scala",
+   "file_extension": ".scala",
+   "help_links": [
+    {
+     "text": "MetaKernel Magics",
+     "url": "https://github.com/calysto/metakernel/blob/master/metakernel/magics/README.md"
+    }
+   ],
+   "mimetype": "text/x-scala",
+   "name": "scala",
+   "pygments_lexer": "scala",
+   "version": "0.4.1"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

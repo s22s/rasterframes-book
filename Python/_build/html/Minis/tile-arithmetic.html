@@ -1,0 +1,471 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Tile Arithmetic &#8212; rasterframes-book  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="section" id="Tile-Arithmetic">
+<h1>Tile Arithmetic<a class="headerlink" href="#Tile-Arithmetic" title="Permalink to this headline">¶</a></h1>
+<p>Rasterframes includes support for arithmetic operations across tiles,
+calling the function on the cells that correspond to each other and
+producing the result of these operations as a tile. For instance, given
+a tile with pixels that are all 1’s and a tile whose pixels are all 2’s,
+the result of a localAdd on those tiles would be a tile with pixel
+values all set to 3. This example uses <code class="docutils literal"><span class="pre">localAdd</span></code>, but
+<code class="docutils literal"><span class="pre">localSubtract</span></code>, <code class="docutils literal"><span class="pre">localDivide</span></code>, and <code class="docutils literal"><span class="pre">localMultiply</span></code> also exist.
+While not used in this example, <code class="docutils literal"><span class="pre">localAddScalar</span></code>,
+<code class="docutils literal"><span class="pre">localSubtractScalar</span></code>, etc can be uses to perform operations with a
+scalar, as opposed to the local values in another tile. If using an
+integer, <code class="docutils literal"><span class="pre">Int</span></code> must be appended to the function name, e.g.
+<code class="docutils literal"><span class="pre">localAddInt</span></code>, <code class="docutils literal"><span class="pre">localSubtractInt</span></code>, etc.</p>
+<p>Initial configs</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pyrasterframes</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pyrasterframes.rasterfunctions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">pyspark</span>
+<span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="k">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span> \
+    <span class="n">master</span><span class="p">(</span><span class="s2">&quot;local[*]&quot;</span><span class="p">)</span><span class="o">.</span> \
+    <span class="n">appName</span><span class="p">(</span><span class="s2">&quot;RasterFrames&quot;</span><span class="p">)</span><span class="o">.</span> \
+    <span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.ui.enabled&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span><span class="o">.</span> \
+    <span class="n">getOrCreate</span><span class="p">()</span><span class="o">.</span> \
+    <span class="n">withRasterFrames</span><span class="p">()</span>
+
+<span class="n">resource_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;./samples&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+<span class="n">filenamePattern</span> <span class="o">=</span> <span class="s2">&quot;L8-B</span><span class="si">{}</span><span class="s2">-Elkton-VA.tiff&quot;</span>
+
+<span class="k">def</span> <span class="nf">readTiff</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">resource_dir</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">filenamePattern</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span><span class="o">.</span><span class="n">as_uri</span><span class="p">()</span>
+
+<span class="n">bandNumbers</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">bandColNames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="s1">&#39;band_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">bandNumbers</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>Once imported, join the tiles together based on a <code class="docutils literal"><span class="pre">spatialKey</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
+<span class="n">joinedRF</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">rf1</span><span class="p">,</span> <span class="n">rf2</span><span class="p">:</span> <span class="n">rf1</span><span class="o">.</span><span class="n">asRF</span><span class="p">()</span><span class="o">.</span><span class="n">spatialJoin</span><span class="p">(</span><span class="n">rf2</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;bounds&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">)),</span>
+                  <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">bf</span><span class="p">:</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">geotiff</span><span class="p">(</span><span class="n">bf</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> \
+                  <span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span><span class="s1">&#39;tile&#39;</span><span class="p">,</span> <span class="s1">&#39;band_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bf</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span>
+                  <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">b</span><span class="p">:</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">readTiff</span><span class="p">(</span><span class="n">b</span><span class="p">)),</span> <span class="n">bandNumbers</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<p>New columns are added based on the results of these local functions.
+<code class="docutils literal"><span class="pre">localAdd</span></code> adds corresponding cells, <code class="docutils literal"><span class="pre">localDivide</span></code> divides them,
+<code class="docutils literal"><span class="pre">localSubtractScalar</span></code> subtracts a scalar from every cell in the input
+tile, and <code class="docutils literal"><span class="pre">localMultiplyScalar</span></code> multiplies each cell by a scalar
+value. There are also functions for comparison, such as
+<code class="docutils literal"><span class="pre">localEqualScalar</span></code>, which sets the new cell to one if it equals a
+scalar value, <code class="docutils literal"><span class="pre">localGreaterEqualScalar</span></code>, which sets a cell to one if
+it is greater than or equal to a scalar, <code class="docutils literal"><span class="pre">localLessScalar</span></code>, etc.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">addRF</span> <span class="o">=</span> <span class="n">joinedRF</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;B1+B2&quot;</span><span class="p">,</span> <span class="n">localAdd</span><span class="p">(</span><span class="s2">&quot;band_1&quot;</span><span class="p">,</span> <span class="s2">&quot;band_2&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">asRF</span><span class="p">()</span>
+<span class="n">divideRF</span> <span class="o">=</span> <span class="n">joinedRF</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;B1/B2&quot;</span><span class="p">,</span> <span class="n">localDivide</span><span class="p">(</span><span class="s2">&quot;band_1&quot;</span><span class="p">,</span> <span class="s2">&quot;band_2&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">asRF</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">subConstantRF</span> <span class="o">=</span> <span class="n">joinedRF</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;B1 = 10000&quot;</span><span class="p">,</span> <span class="n">localEqualScalarInt</span><span class="p">(</span><span class="s2">&quot;band_1&quot;</span><span class="p">,</span> <span class="mi">10000</span><span class="p">))</span><span class="o">.</span><span class="n">asRF</span><span class="p">()</span>
+<span class="n">multScalarRF</span> <span class="o">=</span> <span class="n">joinedRF</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;B1*2&quot;</span><span class="p">,</span> <span class="n">localMultiplyScalarInt</span><span class="p">(</span><span class="s2">&quot;band_1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">asRF</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">subScalarRF</span> <span class="o">=</span> <span class="n">joinedRF</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;B1-100&quot;</span><span class="p">,</span> <span class="n">localLessEqualScalar</span><span class="p">(</span><span class="s2">&quot;band_1&quot;</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">))</span><span class="o">.</span><span class="n">asRF</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal"><span class="pre">tileMax</span></code> computes the max values of the cells in a tile, <code class="docutils literal"><span class="pre">tileSum</span></code>
+computes the sum of all cells, <code class="docutils literal"><span class="pre">tileMean</span></code> finds the mean value, and
+<code class="docutils literal"><span class="pre">tileMin</span></code> finds the minimum value.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">subScalarRF</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">tileMean</span><span class="p">(</span><span class="s2">&quot;B1-100&quot;</span><span class="p">),</span> <span class="n">tileMean</span><span class="p">(</span><span class="s2">&quot;band_1&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++----------------+-----------------+
+|tileMean(B1-100)| tileMean(band_1)|
++----------------+-----------------+
+|             0.0|9834.874785264363|
++----------------+-----------------+
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">addRF</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">tileMax</span><span class="p">(</span><span class="s2">&quot;B1+B2&quot;</span><span class="p">),</span> <span class="n">tileMax</span><span class="p">(</span><span class="s2">&quot;band_1&quot;</span><span class="p">),</span> <span class="n">tileMax</span><span class="p">(</span><span class="s2">&quot;band_2&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++--------------+---------------+---------------+
+|tileMax(B1+B2)|tileMax(band_1)|tileMax(band_2)|
++--------------+---------------+---------------+
+|       42925.0|        20778.0|        22147.0|
++--------------+---------------+---------------+
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">divideRF</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">tileSum</span><span class="p">(</span><span class="s2">&quot;B1/B2&quot;</span><span class="p">),</span> <span class="n">tileSum</span><span class="p">(</span><span class="s2">&quot;band_1&quot;</span><span class="p">),</span> <span class="n">tileSum</span><span class="p">(</span><span class="s2">&quot;band_2&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++--------------+---------------+---------------+
+|tileSum(B1/B2)|tileSum(band_1)|tileSum(band_2)|
++--------------+---------------+---------------+
+|       31389.0|   3.09149454E8|     2.806676E8|
++--------------+---------------+---------------+
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">subConstantRF</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">tileSum</span><span class="p">(</span><span class="s2">&quot;B1 = 10000&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-------------------+
+|tileSum(B1 = 10000)|
++-------------------+
+|               17.0|
++-------------------+
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">multScalarRF</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">tileMin</span><span class="p">(</span><span class="s2">&quot;B1*2&quot;</span><span class="p">),</span> <span class="n">tileMin</span><span class="p">(</span><span class="s2">&quot;band_1&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-------------+---------------+
+|tileMin(B1*2)|tileMin(band_1)|
++-------------+---------------+
+|      18522.0|         9261.0|
++-------------+---------------+
+
+</pre></div></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, James Nachbar.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/Minis/tile-arithmetic.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

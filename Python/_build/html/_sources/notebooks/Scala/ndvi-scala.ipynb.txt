@@ -1,0 +1,215 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Computing NDVI"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Intitializing Scala interpreter ..."
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "text/plain": [
+       "Spark Web UI available at http://172.18.0.2:4040\n",
+       "SparkContext available as 'sc' (version = 2.2.0, master = local[*], app id = local-1531142977598)\n",
+       "SparkSession available as 'spark'\n"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "text/plain": [
+       "import astraea.spark.rasterframes._\n",
+       "import geotrellis.raster._\n",
+       "import geotrellis.raster.render._\n",
+       "import geotrellis.raster.io.geotiff.SinglebandGeoTiff\n",
+       "import geotrellis.spark._\n",
+       "import geotrellis.spark.io._\n",
+       "import org.apache.spark.sql._\n",
+       "import org.apache.spark.sql.functions._\n",
+       "spark: org.apache.spark.sql.SparkSession = org.apache.spark.sql.SparkSession@66d037a9\n",
+       "import spark.implicits._\n",
+       "scene: geotrellis.raster.io.geotiff.SinglebandGeoTiff = SinglebandGeoTiff(geotrellis.raster.UShortConstantNoDataArrayTile@6f3e4295,Extent(431902.5, 4313647.5, 443512.5, 4321147.5),EPSG:32616,Tags(Map(AREA_OR_POINT -> POINT),List(Map())),GeoTiffOptions(geotrellis.raster.io.geotiff.Striped@1c1f469c,geotrellis.raster.io.geotiff.compression.DeflateCompression$@1a88560,1,None))\n",
+       "rf: org.apache.spark.sql.DataFrame..."
+      ]
+     },
+     "execution_count": 1,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import astraea.spark.rasterframes._\n",
+    "import geotrellis.raster._\n",
+    "import geotrellis.raster.render._\n",
+    "import geotrellis.raster.io.geotiff.SinglebandGeoTiff\n",
+    "import geotrellis.spark._\n",
+    "import geotrellis.spark.io._\n",
+    "import org.apache.spark.sql._\n",
+    "import org.apache.spark.sql.functions._\n",
+    "\n",
+    "implicit val spark = SparkSession.builder().\n",
+    "  master(\"local[*]\").appName(\"RasterFrames\").getOrCreate().withRasterFrames\n",
+    "spark.sparkContext.setLogLevel(\"ERROR\")\n",
+    "import spark.implicits._\n",
+    "\n",
+    "val scene = SinglebandGeoTiff(\"../samples/L8-B8-Robinson-IL.tiff\")\n",
+    "val rf = scene.projectedRaster.toRF(128, 128).cache()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Here's an example of computing the Normalized Differential Vegetation Index (NDVI) is a \n",
+    "standardized vegetation index which allows us to generate an image highlighting differences in\n",
+    "relative biomass. \n",
+    "\n",
+    "> “An NDVI is often used worldwide to monitor drought, monitor and predict agricultural production, assist in predicting hazardous fire zones, and map desert encroachment. The NDVI is preferred for global vegetation monitoring because it helps to compensate for changing illumination conditions, surface slope, aspect, and other extraneous factors” (Lillesand. *Remote sensing and image interpretation*. 2004)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "redBand: astraea.spark.rasterframes.RasterFrame\n",
+       "nirBand: astraea.spark.rasterframes.RasterFrame\n",
+       "ndvi: org.apache.spark.sql.expressions.UserDefinedFunction = UserDefinedFunction(<function2>,org.apache.spark.sql.gt.types.TileUDT@29b43b46,Some(List(org.apache.spark.sql.gt.types.TileUDT@29b43b46, org.apache.spark.sql.gt.types.TileUDT@29b43b46)))\n",
+       "rf: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct<col: int, row: int>, red_band: rf_tile ... 2 more fields]\n"
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def redBand = SinglebandGeoTiff(\"../samples/L8-B4-Elkton-VA.tiff\").projectedRaster.toRF(\"red_band\")\n",
+    "def nirBand = SinglebandGeoTiff(\"../samples/L8-B5-Elkton-VA.tiff\").projectedRaster.toRF(\"nir_band\")\n",
+    "\n",
+    "// Define UDF for computing NDVI from red and NIR bands\n",
+    "val ndvi = udf((red: Tile, nir: Tile) ⇒ {\n",
+    "  val redd = red.convert(DoubleConstantNoDataCellType)\n",
+    "  val nird = nir.convert(DoubleConstantNoDataCellType)\n",
+    "  (nird - redd)/(nird + redd)\n",
+    "})\n",
+    "\n",
+    "// We use `asRF` to indicate we know the structure still conforms to RasterFrame constraints\n",
+    "val rf = redBand.spatialJoin(nirBand).withColumn(\"ndvi\", ndvi($\"red_band\", $\"nir_band\")).asRF"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+---------+--------------------+------------------+-------------------+--------------------+\n",
+      "|dataCells|                 min|               max|               mean|            variance|\n",
+      "+---------+--------------------+------------------+-------------------+--------------------+\n",
+      "|    31433|-0.12488999119929595|0.6699834571985877|0.45558948033745933|0.010907294541915387|\n",
+      "+---------+--------------------+------------------+-------------------+--------------------+\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "rf.select(tileStats($\"ndvi\")).show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "ename": "java.io.FileNotFoundException",
+     "evalue": " target/scala-2.11/tut/apps/rf-ndvi.png (No such file or directory)",
+     "output_type": "error",
+     "traceback": [
+      "java.io.FileNotFoundException: target/scala-2.11/tut/apps/rf-ndvi.png (No such file or directory)",
+      "  at java.io.FileOutputStream.open0(Native Method)",
+      "  at java.io.FileOutputStream.open(FileOutputStream.java:270)",
+      "  at java.io.FileOutputStream.<init>(FileOutputStream.java:213)",
+      "  at java.io.FileOutputStream.<init>(FileOutputStream.java:162)",
+      "  at geotrellis.raster.render.Png.write(ImageFormats.scala:36)",
+      "  ... 53 elided",
+      ""
+     ]
+    }
+   ],
+   "source": [
+    "val pr = rf.toRaster($\"ndvi\", 466, 428)\n",
+    "\n",
+    "val brownToGreen = ColorRamp(\n",
+    "  RGBA(166,97,26,255),\n",
+    "  RGBA(223,194,125,255),\n",
+    "  RGBA(245,245,245,255),\n",
+    "  RGBA(128,205,193,255),\n",
+    "  RGBA(1,133,113,255)\n",
+    ").stops(128)\n",
+    "\n",
+    "val colors = ColorMap.fromQuantileBreaks(pr.tile.histogramDouble(), brownToGreen)\n",
+    "// change writing location\n",
+    "pr.tile.color(colors).renderPng().write(\"target/scala-2.11/tut/apps/rf-ndvi.png\")\n",
+    "\n",
+    "//For a georefrenced singleband greyscale image, could do: `GeoTiff(pr).write(\"ndvi.tiff\")`\n",
+    "\n",
+    "spark.stop()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "spylon-kernel",
+   "language": "scala",
+   "name": "spylon-kernel"
+  },
+  "language_info": {
+   "codemirror_mode": "text/x-scala",
+   "file_extension": ".scala",
+   "help_links": [
+    {
+     "text": "MetaKernel Magics",
+     "url": "https://github.com/calysto/metakernel/blob/master/metakernel/magics/README.md"
+    }
+   ],
+   "mimetype": "text/x-scala",
+   "name": "scala",
+   "pygments_lexer": "scala",
+   "version": "0.4.1"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

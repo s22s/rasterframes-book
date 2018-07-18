@@ -1,0 +1,719 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Exporting&nbsp;RasterFrames"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Intitializing Scala interpreter ..."
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "text/plain": [
+       "Spark Web UI available at http://172.18.0.2:4041\n",
+       "SparkContext available as 'sc' (version = 2.2.0, master = local[*], app id = local-1531158623967)\n",
+       "SparkSession available as 'spark'\n"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "text/plain": [
+       "import astraea.spark.rasterframes._\n",
+       "import geotrellis.spark._\n",
+       "import geotrellis.raster._\n",
+       "import geotrellis.raster.render._\n",
+       "import geotrellis.raster.io.geotiff.SinglebandGeoTiff\n",
+       "import org.apache.spark.sql._\n",
+       "import org.apache.spark.sql.functions._\n",
+       "spark: org.apache.spark.sql.SparkSession = org.apache.spark.sql.SparkSession@4c8fae5b\n",
+       "import spark.implicits._\n",
+       "scene: geotrellis.raster.io.geotiff.SinglebandGeoTiff = SinglebandGeoTiff(geotrellis.raster.UShortConstantNoDataArrayTile@2c1b12ca,Extent(431902.5, 4313647.5, 443512.5, 4321147.5),EPSG:32616,Tags(Map(AREA_OR_POINT -> POINT),List(Map())),GeoTiffOptions(geotrellis.raster.io.geotiff.Striped@46a546c2,geotrellis.raster.io.geotiff.compression.DeflateCompression$@32dc819e,1,None))\n",
+       "rf: org.apache.spark.sql.DataFrame with shapeless.tag.Tagged[a..."
+      ]
+     },
+     "execution_count": 1,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import astraea.spark.rasterframes._\n",
+    "import geotrellis.spark._\n",
+    "import geotrellis.raster._\n",
+    "import geotrellis.raster.render._\n",
+    "import geotrellis.raster.io.geotiff.SinglebandGeoTiff\n",
+    "import org.apache.spark.sql._\n",
+    "import org.apache.spark.sql.functions._\n",
+    "\n",
+    "implicit val spark = SparkSession.builder().config(\"spark.ui.enabled\", \"false\").\n",
+    "  master(\"local[*]\").appName(\"RasterFrames\").getOrCreate().withRasterFrames\n",
+    "spark.sparkContext.setLogLevel(\"ERROR\")\n",
+    "import spark.implicits._\n",
+    "val scene = SinglebandGeoTiff(\"../samples/L8-B8-Robinson-IL.tiff\")\n",
+    "val rf = scene.projectedRaster.toRF(128, 128).cache()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "While the goal of RasterFrames is to make it as easy as possible to do your geospatial analysis with a single \n",
+    "construct, it is helpful to be able to transform it into other representations for various use cases.\n",
+    "\n",
+    "## Converting to Array\n",
+    "\n",
+    "The cell values within a `Tile` are encoded internally as an array. There may be use cases \n",
+    "where the additional context provided by the `Tile` construct is no longer needed and one would\n",
+    "prefer to work with the underlying array data.\n",
+    "\n",
+    "The @scaladoc[`tileToArray`][tileToArray] column function requires a type parameter to indicate the array element\n",
+    "type you would like used. The following types may be used: `Int`, `Double`, `Byte`, `Short`, `Float`"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+-----------+----------------------------------------+\n",
+      "|spatial_key|                                tileData|\n",
+      "+-----------+----------------------------------------+\n",
+      "|      [6,3]|[11576, 12488, 9070, 9614, 10561, 112...|\n",
+      "|      [4,0]|[10155, 9839, 9296, 9495, 9921, 9962,...|\n",
+      "|      [2,1]|[14375, 13830, 12012, 11623, 11248, 1...|\n",
+      "|      [0,3]|[10825, 10328, 10289, 10467, 10495, 1...|\n",
+      "|      [0,0]|[14294, 14277, 13939, 13604, 14182, 1...|\n",
+      "+-----------+----------------------------------------+\n",
+      "only showing top 5 rows\n",
+      "\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "withArrays: org.apache.spark.sql.DataFrame = [spatial_key: struct<col: int, row: int>, tileData: array<smallint>]\n"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val withArrays = rf.withColumn(\"tileData\", tileToArray[Short]($\"tile\")).drop(\"tile\")\n",
+    "withArrays.show(5, 40)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can convert the data back to an array, but you have to specify the target tile dimensions. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+-----------+--------------------------------------+\n",
+      "|spatial_key|                             tileAgain|\n",
+      "+-----------+--------------------------------------+\n",
+      "|      [6,3]|ShortRawArrayTile([S@30ea44fc,128,128)|\n",
+      "|      [4,0]|ShortRawArrayTile([S@7f7bd257,128,128)|\n",
+      "|      [2,1]| ShortRawArrayTile([S@6a5c727,128,128)|\n",
+      "|      [0,3]|ShortRawArrayTile([S@429d1b3c,128,128)|\n",
+      "|      [0,0]|ShortRawArrayTile([S@20b26a37,128,128)|\n",
+      "+-----------+--------------------------------------+\n",
+      "only showing top 5 rows\n",
+      "\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "tileBack: org.apache.spark.sql.DataFrame = [spatial_key: struct<col: int, row: int>, tileData: array<smallint> ... 1 more field]\n"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val tileBack = withArrays.withColumn(\"tileAgain\", arrayToTile($\"tileData\", 128, 128))\n",
+    "tileBack.drop(\"tileData\").show(5, 40)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Note that the created tile will not have a `NoData` value associated with it. Here's how you can do that:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+-----------+--------------------------------------------------+\n",
+      "|spatial_key|                                         tileAgain|\n",
+      "+-----------+--------------------------------------------------+\n",
+      "|      [6,3]|ShortUserDefinedNoDataArrayTile([S@433a4961,128...|\n",
+      "|      [4,0]|ShortUserDefinedNoDataArrayTile([S@2b926fa3,128...|\n",
+      "|      [2,1]|ShortUserDefinedNoDataArrayTile([S@7b5e92f8,128...|\n",
+      "|      [0,3]|ShortUserDefinedNoDataArrayTile([S@2df6100d,128...|\n",
+      "|      [0,0]|ShortUserDefinedNoDataArrayTile([S@3c162593,128...|\n",
+      "+-----------+--------------------------------------------------+\n",
+      "only showing top 5 rows\n",
+      "\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "tileBackAgain: org.apache.spark.sql.DataFrame = [spatial_key: struct<col: int, row: int>, tileData: array<smallint> ... 1 more field]\n"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val tileBackAgain = withArrays.withColumn(\"tileAgain\", withNoData(arrayToTile($\"tileData\", 128, 128), 3))\n",
+    "tileBackAgain.drop(\"tileData\").show(5, 50)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Writing to Parquet\n",
+    "\n",
+    "It is often useful to write Spark results in a form that is easily reloaded for subsequent analysis. \n",
+    "The [Parquet](https://parquet.apache.org/)columnar storage format, native to Spark, is ideal for this. RasterFrames\n",
+    "work just like any other DataFrame in this scenario as long as `rfInit` is called to register\n",
+    "the imagery types.\n",
+    "\n",
+    "\n",
+    "Let's assume we have a RasterFrame we've done some fancy processing on: "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "root\n",
+      " |-- spatial_key: struct (nullable = true)\n",
+      " |    |-- col: integer (nullable = false)\n",
+      " |    |-- row: integer (nullable = false)\n",
+      " |-- tile: rf_tile (nullable = true)\n",
+      " |-- equalized: rf_tile (nullable = true)\n",
+      "\n",
+      "+---------+------+-------+-----------------+------------------+\n",
+      "|dataCells|min   |max    |mean             |variance          |\n",
+      "+---------+------+-------+-----------------+------------------+\n",
+      "|387000   |7209.0|39217.0|10160.48549870801|3315238.5311127007|\n",
+      "+---------+------+-------+-----------------+------------------+\n",
+      "\n",
+      "+---------+---+-------+------------------+-------------------+\n",
+      "|dataCells|min|max    |mean              |variance           |\n",
+      "+---------+---+-------+------------------+-------------------+\n",
+      "|458724   |4.0|65535.0|32763.474431248418|3.025128587936561E8|\n",
+      "+---------+---+-------+------------------+-------------------+\n",
+      "\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "import geotrellis.raster.equalization._\n",
+       "equalizer: org.apache.spark.sql.expressions.UserDefinedFunction = UserDefinedFunction(<function1>,org.apache.spark.sql.gt.types.TileUDT@4efee117,Some(List(org.apache.spark.sql.gt.types.TileUDT@4efee117)))\n",
+       "equalized: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct<col: int, row: int>, tile: rf_tile ... 1 more field]\n"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import geotrellis.raster.equalization._\n",
+    "val equalizer = udf((t: Tile) => t.equalize())\n",
+    "val equalized = rf.withColumn(\"equalized\", equalizer($\"tile\")).asRF\n",
+    "\n",
+    "equalized.printSchema\n",
+    "equalized.select(aggStats($\"tile\")).show(false)\n",
+    "equalized.select(aggStats($\"equalized\")).show(false)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We write it out just like any other DataFrame, including the ability to specify partitioning:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "filePath: String = /tmp/equalized.parquet\n"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val filePath = \"/tmp/equalized.parquet\"\n",
+    "equalized.select(\"*\", \"spatial_key.*\").write.partitionBy(\"col\", \"row\").mode(SaveMode.Overwrite).parquet(filePath)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Let's confirm partitioning happened as expected:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "import java.io.File\n",
+       "res5: Array[String] = Array(col=5, col=1, col=6, col=3, col=4, col=2, col=0)\n"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import java.io.File\n",
+    "new File(filePath).list.filter(f => !f.contains(\"_\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now we can load the data back in and check it out:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "root\n",
+      " |-- spatial_key: struct (nullable = true)\n",
+      " |    |-- col: integer (nullable = true)\n",
+      " |    |-- row: integer (nullable = true)\n",
+      " |-- tile: rf_tile (nullable = true)\n",
+      " |-- equalized: rf_tile (nullable = true)\n",
+      " |-- col: integer (nullable = true)\n",
+      " |-- row: integer (nullable = true)\n",
+      "\n",
+      "+---------+------+-------+-----------------+------------------+\n",
+      "|dataCells|min   |max    |mean             |variance          |\n",
+      "+---------+------+-------+-----------------+------------------+\n",
+      "|387000   |7209.0|39217.0|10160.48549870801|3315238.5311127007|\n",
+      "+---------+------+-------+-----------------+------------------+\n",
+      "\n",
+      "+---------+---+-------+------------------+-------------------+\n",
+      "|dataCells|min|max    |mean              |variance           |\n",
+      "+---------+---+-------+------------------+-------------------+\n",
+      "|458724   |4.0|65535.0|32763.474431248418|3.025128587936561E8|\n",
+      "+---------+---+-------+------------------+-------------------+\n",
+      "\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "rf2: org.apache.spark.sql.DataFrame = [spatial_key: struct<col: int, row: int>, tile: rf_tile ... 3 more fields]\n"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val rf2 = spark.read.parquet(filePath)\n",
+    "\n",
+    "rf2.printSchema\n",
+    "equalized.select(aggStats($\"tile\")).show(false)\n",
+    "equalized.select(aggStats($\"equalized\")).show(false)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Exporting a Raster\n",
+    "\n",
+    "For the purposes of debugging, the RasterFrame tiles can be reassembled back into a raster for viewing. However, \n",
+    "keep in mind that this will download all the data to the driver, and reassemble it in-memory. So it's not appropriate \n",
+    "for very large coverages.\n",
+    "\n",
+    "Here's how one might render the image to a georeferenced GeoTIFF file: "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "import geotrellis.raster.io.geotiff.GeoTiff\n",
+       "image: geotrellis.raster.ProjectedRaster[geotrellis.raster.Tile] = ProjectedRaster(Raster(CroppedTile(geotrellis.raster.UShortConstantNoDataArrayTile@243db6ea,GridBounds(0,0,773,499)),Extent(431902.5, 4313647.5, 443512.5, 4321147.5)),utm-CS)\n"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import geotrellis.raster.io.geotiff.GeoTiff\n",
+    "val image = equalized.toRaster($\"equalized\", 774, 500)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "GeoTiff(image).write(\"/tmp/rf-raster.tiff\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "[*Download GeoTIFF*](rf-raster.tiff)\n",
+    "\n",
+    "Here's how one might render a raster frame to a false color PNG file:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "colors: geotrellis.raster.render.ColorMap = geotrellis.raster.render.IntColorMap@15c2cef1\n"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val colors = ColorMap.fromQuantileBreaks(image.tile.histogram, ColorRamps.BlueToOrange)\n",
+    "image.tile.color(colors).renderPng().write(\"/tmp/rf-raster.png\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "![](rf-raster.png)\n",
+    "\n",
+    "## Exporting to a GeoTrellis Layer\n",
+    "\n",
+    "For future analysis it is helpful to persist a RasterFrame as a [GeoTrellis layer](http://geotrellis.readthedocs.io/en/latest/guide/tile-backends.html).\n",
+    "\n",
+    "First, convert the RasterFrame into a TileLayerRDD. The return type is an Either;\n",
+    "the `left` side is for spatial-only keyed data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tlRDD: geotrellis.spark.TileLayerRDD[geotrellis.spark.SpatialKey] = ContextRDD[73] at RDD at ContextRDD.scala:35\n"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "val tlRDD = equalized.toTileLayerRDD($\"equalized\").left.get"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Then create a GeoTrellis layer writer:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "import java.nio.file.Files\n",
+       "import spray.json._\n",
+       "import DefaultJsonProtocol._\n",
+       "import geotrellis.spark.io._\n",
+       "p: java.nio.file.Path = /tmp/gt-store7655057995775895561\n",
+       "writer: geotrellis.spark.io.LayerWriter[geotrellis.spark.LayerId] = geotrellis.spark.io.file.FileLayerWriter@430733c5\n",
+       "layerId: geotrellis.spark.LayerId = Layer(name = \"equalized\", zoom = 0)\n"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import java.nio.file.Files\n",
+    "import spray.json._\n",
+    "import DefaultJsonProtocol._\n",
+    "import geotrellis.spark.io._\n",
+    "val p = Files.createTempDirectory(\"gt-store\")\n",
+    "val writer: LayerWriter[LayerId] = LayerWriter(p.toUri)\n",
+    "\n",
+    "val layerId = LayerId(\"equalized\", 0)\n",
+    "writer.write(layerId, tlRDD, index.ZCurveKeyIndexMethod)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Take a look at the metadata in JSON format:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "res11: String =\n",
+       "{\n",
+       "  \"extent\": {\n",
+       "    \"xmin\": 431902.5,\n",
+       "    \"ymin\": 4313647.5,\n",
+       "    \"xmax\": 443512.5,\n",
+       "    \"ymax\": 4321147.5\n",
+       "  },\n",
+       "  \"layoutDefinition\": {\n",
+       "    \"extent\": {\n",
+       "      \"xmin\": 431902.5,\n",
+       "      \"ymin\": 4313467.5,\n",
+       "      \"xmax\": 445342.5,\n",
+       "      \"ymax\": 4321147.5\n",
+       "    },\n",
+       "    \"tileLayout\": {\n",
+       "      \"layoutCols\": 7,\n",
+       "      \"layoutRows\": 4,\n",
+       "      \"tileCols\": 128,\n",
+       "      \"tileRows\": 128\n",
+       "    }\n",
+       "  },\n",
+       "  \"bounds\": {\n",
+       "    \"minKey\": {\n",
+       "      \"col\": 0,\n",
+       "      \"row\": 0\n",
+       "    },\n",
+       "    \"maxKey\": {\n",
+       "      \"col\": 6,\n",
+       "      \"row\": 3\n",
+       "    }\n",
+       "  },\n",
+       "  \"cellType\": \"uint16\",\n",
+       "  \"crs\": \"+proj=utm +zone=16 +datum=WGS84 +units=m +no_defs \"\n",
+       "}\n"
+      ]
+     },
+     "execution_count": 15,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "AttributeStore(p.toUri).readMetadata[JsValue](layerId).prettyPrint"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Converting to `RDD` and `TileLayerRDD`\n",
+    "\n",
+    "Since a `RasterFrame` is just a `DataFrame` with extra metadata, the method \n",
+    "`DataFrame.rdd` is available for simple conversion back to `RDD` space. The type returned \n",
+    "by `.rdd` is dependent upon how you select it."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "org.apache.spark.rdd.RDD[org.apache.spark.sql.Row]\n",
+      "org.apache.spark.rdd.RDD[(geotrellis.spark.SpatialKey, geotrellis.raster.Tile)]\n",
+      "org.apache.spark.rdd.RDD[(geotrellis.spark.SpatialKey, geotrellis.raster.Tile)]\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "import scala.reflect.runtime.universe._\n",
+       "showType: [T](t: T)(implicit evidence$1: reflect.runtime.universe.TypeTag[T])Unit\n"
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import scala.reflect.runtime.universe._\n",
+    "def showType[T: TypeTag](t: T) = println(implicitly[TypeTag[T]].tpe.toString)\n",
+    "\n",
+    "showType(rf.rdd)\n",
+    "\n",
+    "showType(rf.select(rf.spatialKeyColumn, $\"tile\".as[Tile]).rdd) \n",
+    "\n",
+    "showType(rf.select(rf.spatialKeyColumn, $\"tile\").as[(SpatialKey, Tile)].rdd) "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "If your goal convert a single tile column with its spatial key back to a `TileLayerRDD[K]`, then there's an additional\n",
+    "extension method on `RasterFrame` called `toTileLayerRDD`, which preserves the tile layer metadata,\n",
+    "enhancing interoperation with GeoTrellis RDD extension methods."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "scala.Either[geotrellis.spark.TileLayerRDD[geotrellis.spark.SpatialKey],geotrellis.spark.TileLayerRDD[geotrellis.spark.SpaceTimeKey]]\n"
+     ]
+    }
+   ],
+   "source": [
+    "showType(rf.toTileLayerRDD($\"tile\".as[Tile]))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "[rfInit]: astraea.spark.rasterframes.package#rfInit%28SQLContext%29:Unit\n",
+    "[rdd]: org.apache.spark.sql.Dataset#frdd:org.apache.spark.rdd.RDD[T]\n",
+    "[toTileLayerRDD]: astraea.spark.rasterframes.RasterFrameMethods#toTileLayerRDD%28tileCol:RasterFrameMethods.this.TileColumn%29:Either[geotrellis.spark.TileLayerRDD[geotrellis.spark.SpatialKey],geotrellis.spark.TileLayerRDD[geotrellis.spark.SpaceTimeKey]]\n",
+    "[tileToArray]: astraea.spark.rasterframes.ColumnFunctions#tileToArray"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "spylon-kernel",
+   "language": "scala",
+   "name": "spylon-kernel"
+  },
+  "language_info": {
+   "codemirror_mode": "text/x-scala",
+   "file_extension": ".scala",
+   "help_links": [
+    {
+     "text": "MetaKernel Magics",
+     "url": "https://github.com/calysto/metakernel/blob/master/metakernel/magics/README.md"
+    }
+   ],
+   "mimetype": "text/x-scala",
+   "name": "scala",
+   "pygments_lexer": "scala",
+   "version": "0.4.1"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
