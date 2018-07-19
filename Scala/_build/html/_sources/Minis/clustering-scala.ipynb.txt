@@ -396,7 +396,7 @@
    "source": [
     "| Color Composite    | Cluster Assignments |\n",
     "| ------------------ | ------------------- |\n",
-    "| <img style=\"width:400px;height:400px;\" src=\"outputs/L8-RGB-VA.png\"/> | <img style=\"width:400px;height:400px;\" src=\"outputs/clustered.png\"/>  |"
+    "| ![](outputs/L8-RGB-VA.png) | ![](outputs/clustered.png)  |"
    ]
   },
   {
