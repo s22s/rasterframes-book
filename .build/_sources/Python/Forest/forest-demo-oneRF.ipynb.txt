@@ -63,7 +63,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
+   "execution_count": 3,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -82,7 +82,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
+   "execution_count": 4,
    "metadata": {},
    "outputs": [
     {
@@ -111,7 +111,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 6,
+   "execution_count": 5,
    "metadata": {},
    "outputs": [
     {
@@ -209,7 +209,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 8,
+   "execution_count": 6,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -226,7 +226,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 9,
+   "execution_count": 7,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -248,30 +248,34 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "As you can see, all four bands of all three scenes are now loaded into three seperate rasterframes."
+    "As you can see, all four bands of all three scenes are now loaded into three seperate rasterframes. To simplify the following operations, we will move all three scenes into a single RasterFrame by performing a union."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 29,
-   "metadata": {},
+   "execution_count": 12,
+   "metadata": {
+    "scrolled": true
+   },
    "outputs": [
     {
-     "data": {
-      "text/plain": [
-       "DataFrame[spatial_key: int, band_2: udt, band_3: udt, band_4: udt, band_5: udt]"
-      ]
-     },
-     "execution_count": 29,
-     "metadata": {},
-     "output_type": "execute_result"
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+-----------+--------------------+--------------------+--------------------+--------------------+\n",
+      "|spatial_key|              band_2|              band_3|              band_4|              band_5|\n",
+      "+-----------+--------------------+--------------------+--------------------+--------------------+\n",
+      "|      [0,0]|ShortUserDefinedN...|ShortUserDefinedN...|ShortUserDefinedN...|ShortUserDefinedN...|\n",
+      "|      [0,0]|ShortUserDefinedN...|ShortUserDefinedN...|ShortUserDefinedN...|ShortUserDefinedN...|\n",
+      "|      [0,0]|ShortUserDefinedN...|ShortUserDefinedN...|ShortUserDefinedN...|ShortUserDefinedN...|\n",
+      "+-----------+--------------------+--------------------+--------------------+--------------------+\n",
+      "\n"
+     ]
     }
    ],
    "source": [
-    "from pyspark.sql.functions import lit\n",
-    "fullRFs[0].withColumn(\"spatial_key\", lit(0))\n",
-    "fullRFs[1].withColumn(\"spatial_key\", lit(1))\n",
-    "fullRFs[2].withColumn(\"spatial_key\", lit(2))"
+    "unionRF = fullRFs[0].union(fullRFs[1]).union(fullRFs[2])\n",
+    "unionRF.show()"
    ]
   },
   {
@@ -281,43 +285,6 @@
    },
    "source": [
     "In addition, it is possible to display the center of the extent of the tile in (Lat, Long) format. The method `withCenter` will display it in the native CRS, and `withBounds` and `withSpatialIndex` also exist."
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 433,
-   "metadata": {
-    "scrolled": true
-   },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "+---------------------------------------+\n",
-      "|center                                 |\n",
-      "+---------------------------------------+\n",
-      "|[-66.72875437318221,-8.829838122908235]|\n",
-      "+---------------------------------------+\n",
-      "\n",
-      "+---------------------------------------+\n",
-      "|center                                 |\n",
-      "+---------------------------------------+\n",
-      "|[-66.96294012022688,-8.904540118090805]|\n",
-      "+---------------------------------------+\n",
-      "\n",
-      "+---------------------------------------+\n",
-      "|center                                 |\n",
-      "+---------------------------------------+\n",
-      "|[-66.89073947264485,-8.725024074332008]|\n",
-      "+---------------------------------------+\n",
-      "\n"
-     ]
-    }
-   ],
-   "source": [
-    "for rf in fullRFs:\n",
-    "    rf.asRF().withCenterLatLng().select(\"center\").show(truncate=False)"
    ]
   },
   {
@@ -332,13 +299,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 11,
+   "execution_count": 13,
    "metadata": {},
    "outputs": [],
    "source": [
-    "ndviRFs = [rf.withColumn(\"ndvi\",normalizedDifference(\n",
+    "ndviRF = unionRF.withColumn(\"ndvi\",normalizedDifference(\n",
     "    convertCellType('band_5', 'float32'), \n",
-    "    convertCellType('band_4', 'float32'))) for rf in fullRFs]"
+    "    convertCellType('band_4', 'float32')))"
    ]
   },
   {
@@ -350,13 +317,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 13,
+   "execution_count": 30,
    "metadata": {},
    "outputs": [],
    "source": [
-    "completedRFs = [rf.withColumn(\"grvi\", normalizedDifference(\n",
+    "completedRF = ndviRF.withColumn(\"grvi\", normalizedDifference(\n",
     "    convertCellType('band_3', 'float32'), \n",
-    "    convertCellType('band_4', 'float32'))) for rf in ndviRFs]"
+    "    convertCellType('band_4', 'float32')))"
    ]
   },
   {
@@ -370,54 +337,86 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "completedRFs[0].select(tileStats(\"ndvi\")).show(truncate = False)\n",
-    "completedRFs[0].select(tileStats(\"grvi\")).show(truncate = False)\n",
-    "completedRFs[0].select(tileStats(\"band_5\")).show(truncate = False)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 22,
+   "execution_count": 44,
    "metadata": {},
    "outputs": [
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "+----------------------------------------------------------+\n",
-      "|tileStats(band_2)                                         |\n",
-      "+----------------------------------------------------------+\n",
-      "|[51525,-1,125.0,726.0,237.8598544395925,4944.952683336407]|\n",
-      "+----------------------------------------------------------+\n",
+      "+-----------------------------------------------------------------------------------------+\n",
+      "|tileStats(ndvi)                                                                          |\n",
+      "+-----------------------------------------------------------------------------------------+\n",
+      "|[51525,-1,0.2584196925163269,0.9273137450218201,0.8077649412792555,0.008396342462181239] |\n",
+      "|[57072,-1,-0.5266343951225281,0.914093017578125,0.7854701653986633,0.01124415954480573]  |\n",
+      "|[54285,-1,-0.22884012758731842,0.918924868106842,0.7426226493763454,0.012297012799279415]|\n",
+      "+-----------------------------------------------------------------------------------------+\n",
+      "\n",
+      "+--------------------------------------------------------------------------------------------+\n",
+      "|tileStats(grvi)                                                                             |\n",
+      "+--------------------------------------------------------------------------------------------+\n",
+      "|[51525,-1,-0.16288061439990997,0.3622449040412903,0.17350494746009204,0.009846214924387444] |\n",
+      "|[57072,-1,-0.19738562405109406,0.36206895112991333,0.14357270528606286,0.012844803962253425]|\n",
+      "|[54285,-1,-0.221374049782753,0.3453355133533478,0.10825367489941345,0.01097167769734626]    |\n",
+      "+--------------------------------------------------------------------------------------------+\n",
+      "\n",
+      "+-------------------------------------------------------------+\n",
+      "|tileStats(band_5)                                            |\n",
+      "+-------------------------------------------------------------+\n",
+      "|[51525,-1,869.0,5069.0,3110.0869480834494,227837.1536627382] |\n",
+      "|[57072,-1,391.0,5392.0,3022.0675988225466,120537.12638778637]|\n",
+      "|[54285,-1,279.0,6242.0,3061.8656903380306,147520.38787415036]|\n",
+      "+-------------------------------------------------------------+\n",
       "\n"
      ]
     }
    ],
    "source": [
-    "completedRFs[0].select(tileStats(\"band_2\")).show(truncate = False)"
+    "completedRF.select(tileStats(\"ndvi\")).show(truncate = False)\n",
+    "completedRF.select(tileStats(\"grvi\")).show(truncate = False)\n",
+    "completedRF.select(tileStats(\"band_5\")).show(truncate = False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 43,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "+------------------------------------------------------------------------------------------+\n",
+      "|tileStats(band_3_norm)                                                                    |\n",
+      "+------------------------------------------------------------------------------------------+\n",
+      "|[51502,-1,0.06899055918663761,0.5319535221496006,0.1597627107401713,0.0019124589812026594]|\n",
+      "|[57060,-1,0.07988380537400146,0.6419753086419753,0.16440275763691758,0.002557970641415799]|\n",
+      "|[54256,-1,0.08714596949891068,1.0,0.19152140866067144,0.002718460237669966]               |\n",
+      "+------------------------------------------------------------------------------------------+\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "completedRF.select(tileStats(\"band_3_norm\")).show(truncate = False)"
    ]
   },
   {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "Recall that k-means uses the euclidean distance between two features to assign cluster values to each cell, which is the distance in 6 dimensional space where the six feature dimensions are the four bands and the two indexes we created. However, as we can see from the tile stats, ndvi and grvi are between 0 and 1 while the bands have values in the thousands. This means that the distance between any two points will be largely determined by the band values, which defeats the point of using our vegetation indexes. One solution is to also convert the values of the bands to be between 0 and 1."
+    "Recall that k-means uses the euclidean distance between two features to assign cluster values to each cell, which is the distance in 6 dimensional space where the six feature dimensions are the four bands and the two indexes we created. However, as we can see from the tile stats, ndvi and grvi are between 0 and 1 while the bands have values in the thousands. This means that the distance between any two points will be largely determined by the band values, which largely defeats the point of using our vegetation indexes. One solution is to also convert the values of the bands to be between 0 and 1."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": 39,
    "metadata": {},
    "outputs": [],
    "source": [
-    "completedRFs = for i in band_nums:\n",
-    "                   [rf.withColumn(\"band_{}_norm\".format(i), \n",
-    "                   localDivideScalar(\"band_{}\".format(i), tileMax(\"band_{}\".format(i))))\n",
-    "                   for rf in ndviRFs]"
+    "for i in band_nums:\n",
+    "    completedRF = completedRF.withColumn(\"band_{}_norm\".format(i), \n",
+    "    localDivideScalar(\"band_{}\".format(i), max(completedRF.select(tileMax(\"band_{}\".format(i))).collect())[0] ))"
    ]
   },
   {
@@ -463,7 +462,7 @@
     "from pyspark.ml.feature import VectorAssembler\n",
     "\n",
     "assembler = VectorAssembler() \\\n",
-    "    .setInputCols(bandColNames + [(\"ndvi\")] + [(\"green+blue\")] + [(\"green*2\")] + [(\"NIR-blue\")]) \\\n",
+    "    .setInputCols(bandColNames + [(\"ndvi\")] + [(\"grvi\")]) \\\n",
     "    .setOutputCol(\"features\")"
    ]
   },
