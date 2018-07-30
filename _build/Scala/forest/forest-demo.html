@@ -1,0 +1,1267 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>NDVI Case Study &#8212; RasterFrames-Docs 0.7.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="section" id="NDVI-Case-Study">
+<h1>NDVI Case Study<a class="headerlink" href="#NDVI-Case-Study" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Introduction:">
+<h2>Introduction:<a class="headerlink" href="#Introduction:" title="Permalink to this headline">¶</a></h2>
+<p>Rasterframes is a powerful tool for combining geospatial data and spark
+dataframes. In this case study, we will walk through using rasterframes
+to conduct analysis of a forested region to determine the extent of
+deforestation using NDVI (Normalized Difference Vegetation Index)
+combined with basic machine learning techniques available through
+pysparkML. This tutorial assumes a basic knowledge of dataframes, more
+info can be found
+<a class="reference external" href="https://spark.apache.org/docs/latest/sql-programming-guide.html#datasets-and-dataframes">here</a>:</p>
+</div>
+<div class="section" id="Background:">
+<h2>Background:<a class="headerlink" href="#Background:" title="Permalink to this headline">¶</a></h2>
+<p>As humans expand across the planet, land that was once forested is
+cleared for other activities such as farming or logging. Such land is
+often high in biodiversity, and our forests are an essential feature in
+our ecosystem, and the rate at which they are being destroyed is only
+increasing. Gathering data on the rate of destruction as well as the
+precise regions in which this destruction is occurring allows scientists
+and authorities combat deforestation. Satellite data can be utilized to
+track and prevent deforestation, as demonstrated by this tutorial, which
+uses an example from the Amazon rainforest.</p>
+</div>
+<div class="section" id="Initializing-the-environment:">
+<h2>Initializing the environment:<a class="headerlink" href="#Initializing-the-environment:" title="Permalink to this headline">¶</a></h2>
+<p>First, some imports must be made. The rasterframes library must be
+imported as well as pyspark, which serves as the processing backbone of
+rasterframes.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">import</span> <span class="nn">org.apache.spark.sql._</span>
+<span class="k">import</span> <span class="nn">astraea.spark.rasterframes._</span>
+<span class="k">import</span> <span class="nn">geotrellis.raster.io.geotiff._</span>
+<span class="k">import</span> <span class="nn">geotrellis.raster.io.geotiff.SinglebandGeoTiff</span>
+<span class="k">import</span> <span class="nn">geotrellis.raster._</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[2]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>import org.apache.spark.sql._
+import astraea.spark.rasterframes._
+import geotrellis.raster.io.geotiff._
+import geotrellis.raster.io.geotiff.SinglebandGeoTiff
+import geotrellis.raster._
+
+</pre></div>
+</div>
+</div>
+<p>Once the imports have been made, a <code class="docutils literal notranslate"><span class="pre">sparkSession</span></code> must be created.
+Note the <code class="docutils literal notranslate"><span class="pre">withRasterFrames()</span></code> method that is called which enables
+access to the rasterframes API.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">implicit</span> <span class="k">val</span> <span class="n">spark</span> <span class="k">=</span> <span class="nc">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">().</span>
+  <span class="n">master</span><span class="o">(</span><span class="s">&quot;local[*]&quot;</span><span class="o">).</span><span class="n">appName</span><span class="o">(</span><span class="n">getClass</span><span class="o">.</span><span class="n">getName</span><span class="o">).</span><span class="n">getOrCreate</span><span class="o">().</span><span class="n">withRasterFrames</span>
+<span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">setLogLevel</span><span class="o">(</span><span class="s">&quot;ERROR&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[3]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>spark: org.apache.spark.sql.SparkSession = org.apache.spark.sql.SparkSession@5d2d6ca2
+
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Reading-in-a-Rasterframe">
+<h2>Reading in a Rasterframe<a class="headerlink" href="#Reading-in-a-Rasterframe" title="Permalink to this headline">¶</a></h2>
+<p>Once everything has been initialized, the next step is to read in our
+data. This example will use data in the form of a GeoTiff, but there are
+other ways to create a rasterframe, including from a geotrellis
+<code class="docutils literal notranslate"><span class="pre">Layer</span></code>, <code class="docutils literal notranslate"><span class="pre">ProjectedExtent</span></code>, or <code class="docutils literal notranslate"><span class="pre">tileLayerRDD</span></code> (see
+[creating-rasterframes] for more info). In the case of a geotiff, it’s
+as simple as pointing spark.read.geotiff to the input file(s).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">import</span> <span class="nn">spark.implicits._</span>
+
+<span class="k">def</span> <span class="n">readTiff</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">SinglebandGeoTiff</span> <span class="o">=</span> <span class="nc">SinglebandGeoTiff</span><span class="o">(</span><span class="s">s&quot;</span><span class="si">$name</span><span class="s">&quot;</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">filePath</span> <span class="k">=</span> <span class="s">&quot;data/brazil_1/band2.tif&quot;</span>
+<span class="k">val</span> <span class="n">initRF</span> <span class="k">=</span> <span class="n">readTiff</span><span class="o">(</span><span class="n">filePath</span><span class="o">).</span><span class="n">projectedRaster</span><span class="o">.</span><span class="n">toRF</span><span class="o">(</span><span class="s">s&quot;band_2&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[4]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>import spark.implicits._
+readTiff: (name: String)geotrellis.raster.io.geotiff.SinglebandGeoTiff
+filePath: String = data/brazil_1/band2.tif
+initRF: astraea.spark.rasterframes.RasterFrame = [spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile]
+
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Initial-analysis">
+<h2>Initial analysis<a class="headerlink" href="#Initial-analysis" title="Permalink to this headline">¶</a></h2>
+<p>Immediately, we can perform some basic functions on this rasterframe. A
+brief <code class="docutils literal notranslate"><span class="pre">rf.show()</span></code> will demonstrate that a rasterframe is very similar
+to a dataframe, with named columns corresponding to certain attributes.
+For instance, <code class="docutils literal notranslate"><span class="pre">tile</span></code> contains all the cell values of the image.
+<code class="docutils literal notranslate"><span class="pre">bounds</span></code> contains the bounds of the tiff’s geometry, etc. In this way,
+a tiff raster can be represented as a rasterframe.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="n">initRF</span><span class="o">.</span><span class="n">show</span><span class="o">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-----------+--------------------+
+|spatial_key|              band_2|
++-----------+--------------------+
+|      [0,0]|ShortUserDefinedN...|
++-----------+--------------------+
+
+</pre></div></div>
+</div>
+<p>We can conduct some initial analysis on the tile by calling
+<code class="docutils literal notranslate"><span class="pre">tileStats</span></code> on the tile. The output is an array with the number of
+cells, number of noDataCells, min, max, mean, and variance respectively.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="n">initRF</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="n">tileStats</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;band_2&quot;</span><span class="o">)).</span><span class="n">show</span><span class="o">(</span><span class="kc">false</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++---------+-----------+-----+-----+-----------------+-----------------+
+|dataCells|noDataCells|min  |max  |mean             |variance         |
++---------+-----------+-----+-----+-----------------+-----------------+
+|51525    |-1         |125.0|726.0|237.8598544395925|4944.952683336407|
++---------+-----------+-----+-----+-----------------+-----------------+
+
+</pre></div></div>
+</div>
+<p>We can examine the cell type of a tile with the <code class="docutils literal notranslate"><span class="pre">cellType</span></code> command.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="n">initRF</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="n">cellType</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;band_2&quot;</span><span class="o">)).</span><span class="n">show</span><span class="o">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++--------------------------+
+|celltypeexpression(band_2)|
++--------------------------+
+|              int16ud-9999|
++--------------------------+
+
+</pre></div></div>
+</div>
+<p>Individual stats about a tile can be obtained through the family of
+methods including <code class="docutils literal notranslate"><span class="pre">tileMean</span></code>, <code class="docutils literal notranslate"><span class="pre">tileSum</span></code>, <code class="docutils literal notranslate"><span class="pre">tileMin</span></code>, etc. You’ll
+notice the output of <code class="docutils literal notranslate"><span class="pre">tileMean</span></code> is consistent with the mean value
+found with <code class="docutils literal notranslate"><span class="pre">tileStats</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [23]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="n">initRF</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="n">tileMean</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;band_2&quot;</span><span class="o">)).</span><span class="n">show</span><span class="o">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++------------------+
+|  tileMean(band_2)|
++------------------+
+|237.85985443959243|
++------------------+
+
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Loading-the-rest-of-the-bands">
+<h2>Loading the rest of the bands<a class="headerlink" href="#Loading-the-rest-of-the-bands" title="Permalink to this headline">¶</a></h2>
+<p>This image is a multiband image, but we are going to load in each band
+individually and then perform a spatial join on the bands. This allows
+us to get all the bands in one rasterframe. For this demo, we are using
+visual and near infrared light to calculate NDVI and perform
+unsupervised clustering on the dataset. This means that we are loading
+in bands 2 through 5, which correspond to Blue, Green, Red, and NIR on
+the <a class="reference external" href="https://lta.cr.usgs.gov/L8">Landsat 8 OLI</a>. <code class="docutils literal notranslate"><span class="pre">spatialJoin</span></code> is a
+dataframe join that joins according to a spatial_key column. Bounds and
+metadata are discarded because they are no longer useful for the
+project.</p>
+<p>This project analyzes three seperate scenes, all captured in close
+proximity to each other in the Brazilian rainforest. The background of
+this image is the green band, and it seems obvious from a brief look at
+this band that there is deforestation occurring at all three sites.</p>
+<div class="figure" id="id1">
+<img alt="Pic" src="../../_images/site_locs1.png" />
+<p class="caption"><span class="caption-text">Pic</span></p>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="c1">// Three scenes</span>
+<span class="k">val</span> <span class="n">sceneNums</span> <span class="k">=</span> <span class="mi">1</span> <span class="n">to</span> <span class="mi">3</span>
+<span class="c1">// Four bands per scene (2, 3, 4, and 5)</span>
+<span class="k">val</span> <span class="n">bandNums</span> <span class="k">=</span> <span class="mi">2</span> <span class="n">to</span> <span class="mi">5</span>
+
+<span class="k">val</span> <span class="n">filePattern</span> <span class="k">=</span> <span class="s">&quot;data/brazil_%d/band%d.tif&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[6]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>sceneNums: scala.collection.immutable.Range.Inclusive = Range(1, 2, 3)
+bandNums: scala.collection.immutable.Range.Inclusive = Range(2, 3, 4, 5)
+filePattern: String = data/brazil_%d/band%d.tif
+
+</pre></div>
+</div>
+</div>
+<p>Create the name of the files that we will need to read. Then, read all
+those files in and convert them to RasterFrames. Finally, perform a
+spatial join on the list of rasterframes containing only one band as a
+tile to create a larger RasterFrame.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">fullRFs</span> <span class="k">=</span> <span class="n">sceneNums</span><span class="o">.</span><span class="n">map</span><span class="o">{</span><span class="n">sn</span> <span class="k">=&gt;</span> <span class="n">bandNums</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="n">bn</span> <span class="k">=&gt;</span> <span class="o">(</span><span class="n">bn</span><span class="o">,</span> <span class="n">filePattern</span><span class="o">.</span><span class="n">format</span><span class="o">(</span><span class="n">sn</span><span class="o">,</span> <span class="n">bn</span><span class="o">))}</span>
+                   <span class="o">.</span><span class="n">map</span><span class="o">{</span><span class="n">bandFile</span> <span class="k">=&gt;</span> <span class="n">readTiff</span><span class="o">(</span><span class="n">bandFile</span><span class="o">.</span><span class="n">_2</span><span class="o">).</span><span class="n">projectedRaster</span><span class="o">.</span><span class="n">toRF</span><span class="o">(</span><span class="s">&quot;band_%d&quot;</span><span class="o">.</span><span class="n">format</span><span class="o">(</span><span class="n">bandFile</span><span class="o">.</span><span class="n">_1</span><span class="o">))}</span>
+                   <span class="o">.</span><span class="n">reduce</span><span class="o">(</span><span class="k">_</span> <span class="n">spatialJoin</span> <span class="k">_</span><span class="o">)}</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[7]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>fullRFs: scala.collection.immutable.IndexedSeq[astraea.spark.rasterframes.RasterFrame] = Vector([spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile ... 3 more fields], [spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile ... 3 more fields], [spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile ... 3 more fields])
+
+</pre></div>
+</div>
+</div>
+<p>As you can see, all four bands of all three scenes are now loaded into
+three seperate rasterframes.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">for</span> <span class="o">(</span><span class="n">rf</span> <span class="k">&lt;-</span> <span class="n">fullRFs</span><span class="o">)</span> <span class="n">rf</span><span class="o">.</span><span class="n">show</span><span class="o">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-----------+--------------------+--------------------+--------------------+--------------------+
+|spatial_key|              band_2|              band_3|              band_4|              band_5|
++-----------+--------------------+--------------------+--------------------+--------------------+
+|      [0,0]|ShortUserDefinedN...|ShortUserDefinedN...|ShortUserDefinedN...|ShortUserDefinedN...|
++-----------+--------------------+--------------------+--------------------+--------------------+
+
++-----------+--------------------+--------------------+--------------------+--------------------+
+|spatial_key|              band_2|              band_3|              band_4|              band_5|
++-----------+--------------------+--------------------+--------------------+--------------------+
+|      [0,0]|ShortUserDefinedN...|ShortUserDefinedN...|ShortUserDefinedN...|ShortUserDefinedN...|
++-----------+--------------------+--------------------+--------------------+--------------------+
+
++-----------+--------------------+--------------------+--------------------+--------------------+
+|spatial_key|              band_2|              band_3|              band_4|              band_5|
++-----------+--------------------+--------------------+--------------------+--------------------+
+|      [0,0]|ShortUserDefinedN...|ShortUserDefinedN...|ShortUserDefinedN...|ShortUserDefinedN...|
++-----------+--------------------+--------------------+--------------------+--------------------+
+
+</pre></div></div>
+</div>
+<p>In addition, it is possible to display the center of the extent of the
+tile in (Lat, Long) format. The method <code class="docutils literal notranslate"><span class="pre">withCenter</span></code> will display it in
+the native CRS, and <code class="docutils literal notranslate"><span class="pre">withBounds</span></code> and <code class="docutils literal notranslate"><span class="pre">withSpatialIndex</span></code> also exist.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fullRFs</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="n">withCenterLatLng</span><span class="o">().</span><span class="n">select</span><span class="o">(</span><span class="s">&quot;center&quot;</span><span class="o">).</span><span class="n">show</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="kc">false</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++---------------------------------------+
+|center                                 |
++---------------------------------------+
+|[-66.72875437318221,-8.829838122908235]|
++---------------------------------------+
+
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Tile-arithmetic">
+<h2>Tile arithmetic<a class="headerlink" href="#Tile-arithmetic" title="Permalink to this headline">¶</a></h2>
+<p>This example uses
+<a class="reference external" href="https://earthobservatory.nasa.gov/Features/MeasuringVegetation/measuring_vegetation_2.php">NDVI</a>,
+which is a metric computed from the normalized difference between two of
+our bands, the NIR band (band 5), and the red band (band 4). We will add
+another column, this time with the tiles as the normalized difference
+between the NIR and red bands for each scene. In addition, it is
+sometimes useful to compute additional relationships between bands to
+use as features in a machine learning algorithm. Additionally, the cell
+types of the NIR and red bands are converted to floats for the purposes
+of stability with <code class="docutils literal notranslate"><span class="pre">convertCellType</span></code>, which changes the data type of
+the cells in a tile. The diagram below is a local function that operates
+on colors.</p>
+<p><img alt="image0" src="Scala/forest/../../local-functions.gif" /></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">ndviRFs</span> <span class="k">=</span> <span class="n">fullRFs</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="n">rf</span> <span class="k">=&gt;</span> <span class="n">rf</span><span class="o">.</span><span class="n">withColumn</span><span class="o">(</span><span class="s">&quot;ndvi&quot;</span><span class="o">,</span>
+        <span class="n">normalizedDifference</span><span class="o">(</span><span class="n">convertCellType</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;band_5&quot;</span><span class="o">,</span> <span class="s">&quot;float32&quot;</span><span class="o">),</span> <span class="n">convertCellType</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;band_4&quot;</span><span class="o">,</span> <span class="s">&quot;float32&quot;</span><span class="o">)))</span> <span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[10]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>ndviRFs: scala.collection.immutable.IndexedSeq[org.apache.spark.sql.DataFrame] = Vector([spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile ... 4 more fields], [spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile ... 4 more fields], [spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile ... 4 more fields])
+
+</pre></div>
+</div>
+</div>
+<p>Normalized difference is a local function that is equivalent to
+<span class="math notranslate nohighlight">\(\frac{NIR - Red}{NIR + Red}\)</span>. Local functions perform functions
+on a cellwise basis. Every cell in a band has corresponding cells in
+another band, and the output of a local function is a tile where the
+cell values are determined by some function that operates on every cell
+individually. We will find the sum of the green and blue bands to use in
+our clustering model. <code class="docutils literal notranslate"><span class="pre">localAdd</span></code> is part of a family of arithemtic
+functions, and it adds the values of every corresponding cell together
+to produce an output cell. There also exist local scalar arithmetic
+functions, which you must append “Int” to to use with an integer.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">completeRFs</span> <span class="k">=</span> <span class="n">ndviRFs</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="n">rf</span> <span class="k">=&gt;</span> <span class="n">rf</span><span class="o">.</span><span class="n">withColumn</span><span class="o">(</span><span class="s">&quot;green+blue&quot;</span><span class="o">,</span> <span class="n">localAdd</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;band_3&quot;</span><span class="o">,</span> <span class="n">$</span><span class="s">&quot;band_2&quot;</span><span class="o">))</span> <span class="o">}</span>
+               <span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="n">rf</span> <span class="k">=&gt;</span> <span class="n">rf</span><span class="o">.</span><span class="n">withColumn</span><span class="o">(</span><span class="s">&quot;green*2&quot;</span><span class="o">,</span> <span class="n">localMultiplyScalar</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;band_3&quot;</span><span class="o">,</span> <span class="mi">2</span><span class="o">))</span> <span class="o">}</span>
+               <span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="n">rf</span> <span class="k">=&gt;</span> <span class="n">rf</span><span class="o">.</span><span class="n">withColumn</span><span class="o">(</span><span class="s">&quot;NIR-blue&quot;</span><span class="o">,</span> <span class="n">localSubtract</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;band_5&quot;</span><span class="o">,</span> <span class="n">$</span><span class="s">&quot;band_2&quot;</span><span class="o">))</span> <span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[11]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>completeRFs: scala.collection.immutable.IndexedSeq[org.apache.spark.sql.DataFrame] = Vector([spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile ... 7 more fields], [spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile ... 7 more fields], [spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile ... 7 more fields])
+
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">for</span> <span class="o">(</span><span class="n">rf</span> <span class="k">&lt;-</span> <span class="n">completeRFs</span><span class="o">)</span> <span class="n">rf</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="n">tileStats</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;ndvi&quot;</span><span class="o">)).</span><span class="n">show</span><span class="o">(</span><span class="kc">false</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++---------+-----------+------------------+------------------+------------------+--------------------+
+|dataCells|noDataCells|min               |max               |mean              |variance            |
++---------+-----------+------------------+------------------+------------------+--------------------+
+|51525    |-1         |0.2584196925163269|0.9273137450218201|0.8077649412792555|0.008396342462181239|
++---------+-----------+------------------+------------------+------------------+--------------------+
+
++---------+-----------+-------------------+-----------------+------------------+-------------------+
+|dataCells|noDataCells|min                |max              |mean              |variance           |
++---------+-----------+-------------------+-----------------+------------------+-------------------+
+|57072    |-1         |-0.5266343951225281|0.914093017578125|0.7854701653986633|0.01124415954480573|
++---------+-----------+-------------------+-----------------+------------------+-------------------+
+
++---------+-----------+--------------------+-----------------+------------------+--------------------+
+|dataCells|noDataCells|min                 |max              |mean              |variance            |
++---------+-----------+--------------------+-----------------+------------------+--------------------+
+|54285    |-1         |-0.22884012758731842|0.918924868106842|0.7426226493763454|0.012297012799279415|
++---------+-----------+--------------------+-----------------+------------------+--------------------+
+
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Machine-learning">
+<h2>Machine learning<a class="headerlink" href="#Machine-learning" title="Permalink to this headline">¶</a></h2>
+<p>The purpose of this demonstration is to determine the extent of
+deforestation in the selected areas in a procedural way. To this end, we
+will use a straightforward
+<a class="reference external" href="https://en.wikipedia.org/wiki/K-means_clustering">k-means</a>
+clustering algorithm available to us through PySparkML.</p>
+<div class="section" id="Pipeline">
+<h3>Pipeline<a class="headerlink" href="#Pipeline" title="Permalink to this headline">¶</a></h3>
+<p>The algorithm works through assigning features to clusters. PySparkML
+requires that each feature be in its own row, and those features be
+packed into a single <code class="docutils literal notranslate"><span class="pre">Vector</span></code>. This means that all the information
+must be packed into a single feature vector. The first step is to
+“explode” the tiles into a single row per cell/pixel, so the top left
+cell is assigned its own row, with the cellwise values of every band as
+the values in that row.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">import</span> <span class="nn">astraea.spark.rasterframes.ml.TileExploder</span>
+
+<span class="k">val</span> <span class="n">exploder</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">TileExploder</span><span class="o">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[13]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>import astraea.spark.rasterframes.ml.TileExploder
+exploder: astraea.spark.rasterframes.ml.TileExploder = tile-exploder_02e5edf127bf
+
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">bandColNames</span> <span class="k">=</span> <span class="n">bandNums</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="n">x</span> <span class="k">=&gt;</span> <span class="s">&quot;band_%d&quot;</span><span class="o">.</span><span class="n">format</span><span class="o">(</span><span class="n">x</span><span class="o">)</span> <span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[14]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>bandColNames: scala.collection.immutable.IndexedSeq[String] = Vector(band_2, band_3, band_4, band_5)
+
+</pre></div>
+</div>
+</div>
+<p>The next step is for the cell values in their seperate columns to be
+assembled into a single feature vector. PySparkML has a tool for this
+called a <code class="docutils literal notranslate"><span class="pre">VectorAssembler</span></code> which has as inputs a certain number of
+columns of features and outputs a single column with the vectorized
+features in it.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">import</span> <span class="nn">org.apache.spark.ml.feature.VectorAssembler</span>
+
+<span class="k">val</span> <span class="n">assembler</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">VectorAssembler</span><span class="o">()</span>
+    <span class="o">.</span><span class="n">setInputCols</span><span class="o">((</span><span class="n">bandColNames</span> <span class="o">:+</span> <span class="o">(</span><span class="s">&quot;ndvi&quot;</span><span class="o">)</span> <span class="o">:+</span> <span class="o">(</span><span class="s">&quot;green+blue&quot;</span><span class="o">)</span> <span class="o">:+</span> <span class="o">(</span><span class="s">&quot;green*2&quot;</span><span class="o">)</span> <span class="o">:+</span> <span class="o">(</span><span class="s">&quot;NIR-blue&quot;</span><span class="o">)).</span><span class="n">toArray</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">setOutputCol</span><span class="o">(</span><span class="s">&quot;features&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[15]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>import org.apache.spark.ml.feature.VectorAssembler
+assembler: org.apache.spark.ml.feature.VectorAssembler = vecAssembler_d030a8ca3a6a
+
+</pre></div>
+</div>
+</div>
+<p>For our example we are setting the number of clusters to 2, because we
+seek simply to differentiate between forested area and non forested
+area.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [16]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">import</span> <span class="nn">org.apache.spark.ml.Pipeline</span>
+<span class="k">import</span> <span class="nn">org.apache.spark.ml.clustering.</span><span class="o">{</span><span class="nc">KMeans</span><span class="o">,</span> <span class="nc">KMeansModel</span><span class="o">}</span>
+
+<span class="k">val</span> <span class="n">kmeans</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">KMeans</span><span class="o">().</span><span class="n">setK</span><span class="o">(</span><span class="mi">3</span><span class="o">)</span>
+
+<span class="c1">// We establish our pipeline with our stages</span>
+<span class="k">val</span> <span class="n">pipeline</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Pipeline</span><span class="o">().</span><span class="n">setStages</span><span class="o">(</span><span class="nc">Array</span><span class="o">(</span><span class="n">exploder</span><span class="o">,</span> <span class="n">assembler</span><span class="o">,</span> <span class="n">kmeans</span><span class="o">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[16]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>import org.apache.spark.ml.Pipeline
+import org.apache.spark.ml.clustering.{KMeans, KMeansModel}
+kmeans: org.apache.spark.ml.clustering.KMeans = kmeans_b7b6f31bd1f5
+pipeline: org.apache.spark.ml.Pipeline = pipeline_5ed6d02e47de
+
+</pre></div>
+</div>
+</div>
+<p>Finally, we fit our model and compute our clusters</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">models</span> <span class="k">=</span> <span class="n">completeRFs</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="n">rf</span> <span class="k">=&gt;</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="o">(</span><span class="n">rf</span><span class="o">)</span> <span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[17]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>models: scala.collection.immutable.IndexedSeq[org.apache.spark.ml.PipelineModel] = Vector(pipeline_5ed6d02e47de, pipeline_5ed6d02e47de, pipeline_5ed6d02e47de)
+
+</pre></div>
+</div>
+</div>
+<p>Upon fitting the model and transforming the data, we see the exploded
+data. Instead of a tile, every entry in a band contain a single pixel
+value. In addition, there is a prediction column that contains the
+result of the model’s clustering.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [18]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">rfModelZip</span> <span class="k">=</span> <span class="n">completeRFs</span><span class="o">.</span><span class="n">zip</span><span class="o">(</span><span class="n">models</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[18]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>rfModelZip: scala.collection.immutable.IndexedSeq[(org.apache.spark.sql.DataFrame, org.apache.spark.ml.PipelineModel)] = Vector(([spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile ... 7 more fields],pipeline_5ed6d02e47de), ([spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile ... 7 more fields],pipeline_5ed6d02e47de), ([spatial_key: struct&lt;col: int, row: int&gt;, band_2: rf_tile ... 7 more fields],pipeline_5ed6d02e47de))
+
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [46]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">clusteredDFs</span> <span class="k">=</span> <span class="n">rfModelZip</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="n">rf_md</span> <span class="k">=&gt;</span> <span class="n">rf_md</span><span class="o">.</span><span class="n">_2</span><span class="o">.</span><span class="n">transform</span><span class="o">(</span><span class="n">rf_md</span><span class="o">.</span><span class="n">_1</span><span class="o">)</span> <span class="o">}</span>
+
+<span class="n">clusteredDFs</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="n">drop</span><span class="o">(</span><span class="s">&quot;row_index&quot;</span><span class="o">,</span> <span class="s">&quot;features&quot;</span><span class="o">).</span><span class="n">show</span><span class="o">(</span><span class="mi">3</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-----------+------------+------+------+------+------+------------------+----------+-------+--------+----------+
+|spatial_key|column_index|band_2|band_3|band_4|band_5|              ndvi|green+blue|green*2|NIR-blue|prediction|
++-----------+------------+------+------+------+------+------------------+----------+-------+--------+----------+
+|      [0,0]|           0| 188.0| 349.0| 206.0|2750.0|0.8606224656105042|     537.0|  698.0|  2562.0|         0|
+|      [0,0]|           1| 184.0| 340.0| 207.0|2837.0|0.8639947175979614|     524.0|  680.0|  2653.0|         0|
+|      [0,0]|           2| 196.0| 356.0| 227.0|2856.0|0.8527408242225647|     552.0|  712.0|  2660.0|         0|
++-----------+------------+------+------+------+------+------------------+----------+-------+--------+----------+
+only showing top 3 rows
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[46]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>clusteredDFs: scala.collection.immutable.IndexedSeq[org.apache.spark.sql.DataFrame] = Vector([spatial_key: struct&lt;col: int, row: int&gt;, column_index: int ... 11 more fields], [spatial_key: struct&lt;col: int, row: int&gt;, column_index: int ... 11 more fields], [spatial_key: struct&lt;col: int, row: int&gt;, column_index: int ... 11 more fields])
+
+</pre></div>
+</div>
+</div>
+<p>In order to visualize the predictions of our model, we must first
+convert the exploded version of the tile back into an actual tile. We
+must extract the spatial data from our previous rasterframe, because
+clusteredRFs is not a RasterFrame (RasterFrames must have a tile column,
+and this dataframe is full of exploded cell values).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [22]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">tiledRFs</span> <span class="k">=</span> <span class="o">(</span><span class="mi">0</span> <span class="n">to</span> <span class="mi">2</span><span class="o">).</span><span class="n">map</span> <span class="o">{</span> <span class="n">i</span> <span class="k">=&gt;</span>
+
+    <span class="k">val</span> <span class="n">tlm</span> <span class="k">=</span> <span class="n">fullRFs</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="n">tileLayerMetadata</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">get</span>
+
+    <span class="n">clusteredDFs</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="n">groupBy</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;spatial_key&quot;</span><span class="o">).</span><span class="n">agg</span><span class="o">(</span>
+        <span class="n">assembleTile</span><span class="o">(</span>
+            <span class="n">$</span><span class="s">&quot;column_index&quot;</span><span class="o">,</span> <span class="n">$</span><span class="s">&quot;row_index&quot;</span><span class="o">,</span> <span class="n">$</span><span class="s">&quot;prediction&quot;</span><span class="o">,</span>
+            <span class="n">tlm</span><span class="o">.</span><span class="n">tileCols</span><span class="o">,</span> <span class="n">tlm</span><span class="o">.</span><span class="n">tileRows</span><span class="o">,</span> <span class="nc">ByteConstantNoDataCellType</span>
+        <span class="o">)</span>
+    <span class="o">).</span><span class="n">asRF</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[22]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>tiledRFs: scala.collection.immutable.IndexedSeq[astraea.spark.rasterframes.RasterFrame] = Vector([spatial_key: struct&lt;col: int, row: int&gt;, prediction: rf_tile], [spatial_key: struct&lt;col: int, row: int&gt;, prediction: rf_tile], [spatial_key: struct&lt;col: int, row: int&gt;, prediction: rf_tile])
+
+</pre></div>
+</div>
+</div>
+<p>To render our visualization, we convert to a raster first, which gives
+us a 1-D array with all the cell values. We then reshape the raster into
+a 2d array and use an matplotlib colormap to assign each discrete
+cluster a different color.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [24]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">resolutions</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">((</span><span class="mi">229</span><span class="o">,</span> <span class="mi">225</span><span class="o">),</span> <span class="o">(</span><span class="mi">232</span><span class="o">,</span> <span class="mi">246</span><span class="o">),</span> <span class="o">(</span><span class="mi">235</span><span class="o">,</span> <span class="mi">231</span><span class="o">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[24]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>resolutions: Seq[(Int, Int)] = List((229,225), (232,246), (235,231))
+
+</pre></div>
+</div>
+</div>
+<p>Zip the prediction RFs and their respective resolutions to prepare to
+render them</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [25]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">zipPredsRes</span> <span class="k">=</span> <span class="n">tiledRFs</span><span class="o">.</span><span class="n">zip</span><span class="o">(</span><span class="n">resolutions</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[25]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>zipPredsRes: scala.collection.immutable.IndexedSeq[(astraea.spark.rasterframes.RasterFrame, (Int, Int))] = Vector(([spatial_key: struct&lt;col: int, row: int&gt;, prediction: rf_tile],(229,225)), ([spatial_key: struct&lt;col: int, row: int&gt;, prediction: rf_tile],(232,246)), ([spatial_key: struct&lt;col: int, row: int&gt;, prediction: rf_tile],(235,231)))
+
+</pre></div>
+</div>
+</div>
+<p>Create a one dimensional array from the prediction data</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [26]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">predRasters</span> <span class="k">=</span> <span class="n">zipPredsRes</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="n">pdsRes</span> <span class="k">=&gt;</span> <span class="n">pdsRes</span><span class="o">.</span><span class="n">_1</span><span class="o">.</span><span class="n">toRaster</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;prediction&quot;</span><span class="o">,</span> <span class="n">pdsRes</span><span class="o">.</span><span class="n">_2</span><span class="o">.</span><span class="n">_2</span><span class="o">,</span> <span class="n">pdsRes</span><span class="o">.</span><span class="n">_2</span><span class="o">.</span><span class="n">_1</span><span class="o">)</span> <span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[26]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>predRasters: scala.collection.immutable.IndexedSeq[geotrellis.raster.ProjectedRaster[geotrellis.raster.Tile]] = Vector(ProjectedRaster(Raster(CroppedTile(ByteConstantNoDataArrayTile([B@5faa95bc,225,229),GridBounds(0,0,224,228)),Extent(746445.0, -980235.0, 753195.0, -973365.0)),utm-CS), ProjectedRaster(Raster(CroppedTile(ByteConstantNoDataArrayTile([B@7cbc2198,246,232),GridBounds(0,0,245,231)),Extent(720315.0, -988395.0, 727695.0, -981435.0)),utm-CS), ProjectedRaster(Raster(CroppedTile(ByteConstantNoDataArrayTile([B@78df4e4b,231,235),GridBounds(0,0,230,234)),Extent(728595.0, -968625.0, 735525.0, -961575.0)),utm-CS))
+
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [27]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">import</span> <span class="nn">geotrellis.raster.render._</span>
+
+<span class="k">val</span> <span class="n">cmap</span> <span class="k">=</span> <span class="nc">ColorRamp</span><span class="o">(</span><span class="mh">0x0ab881FF</span><span class="o">,</span> <span class="mh">0xe9aa0cFF</span><span class="o">,</span> <span class="mh">0xe9e10cFF</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">cmap_r</span> <span class="k">=</span> <span class="nc">ColorRamp</span><span class="o">(</span><span class="mh">0xe9e10cFF</span><span class="o">,</span> <span class="mh">0xe9aa0cFF</span><span class="o">,</span> <span class="mh">0x0ab881FF</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">clusterColors</span> <span class="k">=</span> <span class="nc">IndexedColorMap</span><span class="o">.</span><span class="n">fromColorMap</span><span class="o">(</span><span class="n">cmap</span><span class="o">.</span><span class="n">toColorMap</span><span class="o">((</span><span class="mi">0</span> <span class="n">until</span> <span class="mi">3</span><span class="o">).</span><span class="n">toArray</span><span class="o">))</span>
+<span class="c1">// Reverse the aboce color</span>
+<span class="k">val</span> <span class="n">clusterColorsReverse</span> <span class="k">=</span> <span class="nc">IndexedColorMap</span><span class="o">.</span><span class="n">fromColorMap</span><span class="o">(</span><span class="n">cmap_r</span><span class="o">.</span><span class="n">toColorMap</span><span class="o">((</span><span class="mi">0</span> <span class="n">until</span> <span class="mi">3</span><span class="o">).</span><span class="n">toArray</span><span class="o">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[27]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>import geotrellis.raster.render._
+cmap: geotrellis.raster.render.ColorRamp = geotrellis.raster.render.ColorRamp@5a232057
+cmap_r: geotrellis.raster.render.ColorRamp = geotrellis.raster.render.ColorRamp@7b0572b3
+clusterColors: geotrellis.raster.render.IndexedColorMap = IndexedColorMap(0xab881ff, 0xe9aa0cff, 0xe9e10cff)
+clusterColorsReverse: geotrellis.raster.render.IndexedColorMap = IndexedColorMap(0xe9e10cff, 0xe9aa0cff, 0xab881ff)
+
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="n">predRasters</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="n">tile</span><span class="o">.</span><span class="n">renderPng</span><span class="o">(</span><span class="n">clusterColors</span><span class="o">).</span><span class="n">write</span><span class="o">(</span><span class="s">s&quot;pics/clust1.png&quot;</span><span class="o">)</span>
+<span class="n">predRasters</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="mi">1</span><span class="o">).</span><span class="n">tile</span><span class="o">.</span><span class="n">renderPng</span><span class="o">(</span><span class="n">clusterColorsReverse</span><span class="o">).</span><span class="n">write</span><span class="o">(</span><span class="s">s&quot;pics/clust2.png&quot;</span><span class="o">)</span>
+<span class="n">predRasters</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="mi">2</span><span class="o">).</span><span class="n">tile</span><span class="o">.</span><span class="n">renderPng</span><span class="o">(</span><span class="n">clusterColors</span><span class="o">).</span><span class="n">write</span><span class="o">(</span><span class="s">s&quot;pics/clust3.png&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<p>Here are the images created by the clustering algorithm:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Site 1</th>
+<th class="head">Site 2</th>
+<th class="head">Site 3</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+<p>Compared to the original green bands:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Site 1</th>
+<th class="head">Site 2</th>
+<th class="head">Site 3</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+<p>As you can see, the green represents forest, with the other two shades
+representing land that is cleared to some degree. Now let’s access more
+precise statistics about this use by calculating tileHistograms for all
+three scenes.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [38]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="k">val</span> <span class="n">histograms</span> <span class="k">=</span> <span class="n">tiledRFs</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span> <span class="n">rf</span> <span class="k">=&gt;</span> <span class="n">rf</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="n">tileHistogram</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;prediction&quot;</span><span class="o">)).</span><span class="n">first</span><span class="o">()</span> <span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[38]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>histograms: scala.collection.immutable.IndexedSeq[astraea.spark.rasterframes.stats.CellHistogram] = Vector(CellHistogram(CellStatistics(51525,-1,0.0,2.0,0.8727025715672004,0.7370025456945029),List(Bin(0.0,22684), Bin(1.0,12716), Bin(2.0,16125))), CellHistogram(CellStatistics(57072,-1,0.0,2.0,1.1874474348191757,0.6554648048483402),List(Bin(0.0,14358), Bin(1.0,17658), Bin(2.0,25056))), CellHistogram(CellStatistics(54285,-1,0.0,2.0,0.9665285069540389,0.5030152398845995),List(Bin(0.0,14592), Bin(1.0,26918), Bin(2.0,12775))))
+
+</pre></div>
+</div>
+</div>
+<p>In these examples, it appears that a value of zero (Green in the
+colormap) represents forest for scenes one and three, and 2 represents
+forest in scene 2. Let’s find the percentage of land covered by forest
+in these examples by querying our histograms.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [39]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="c1">// Returns the number of cells that we believe the model marked similarly to forest</span>
+<span class="k">val</span> <span class="n">forest1</span> <span class="k">=</span> <span class="n">histograms</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="n">itemCount</span><span class="o">(</span><span class="mf">0.0</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">forest2</span> <span class="k">=</span> <span class="n">histograms</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="mi">1</span><span class="o">).</span><span class="n">itemCount</span><span class="o">(</span><span class="mf">2.0</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">forest3</span> <span class="k">=</span> <span class="n">histograms</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="mi">2</span><span class="o">).</span><span class="n">itemCount</span><span class="o">(</span><span class="mf">0.0</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[39]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>forest1: Long = 22684
+forest2: Long = 25056
+forest3: Long = 14592
+
+</pre></div>
+</div>
+</div>
+<p>In the first scene, a little less than half of the scene is composed of
+the values that resemble rainforest (according to the model).</p>
+<p>Number of forest divided by the total</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [45]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="n">forest1</span> <span class="o">/</span> <span class="n">histograms</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="n">totalCount</span><span class="o">.</span><span class="n">toFloat</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[45]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>res16: Float = 0.4402523
+
+</pre></div>
+</div>
+</div>
+<p>Total forest cells for all three scenes, divided by total cells</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [44]:
+</pre></div>
+</div>
+<div class="input_area highlight-scala notranslate"><div class="highlight"><pre>
+<span></span><span class="o">(</span><span class="n">forest1</span> <span class="o">+</span> <span class="n">forest2</span> <span class="o">+</span> <span class="n">forest3</span><span class="o">)</span> <span class="o">/</span>
+<span class="o">(</span><span class="n">histograms</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="n">totalCount</span> <span class="o">+</span> <span class="n">histograms</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="mi">1</span><span class="o">).</span><span class="n">totalCount</span> <span class="o">+</span> <span class="n">histograms</span><span class="o">.</span><span class="n">apply</span><span class="o">(</span><span class="mi">2</span><span class="o">).</span><span class="n">totalCount</span><span class="o">).</span><span class="n">toFloat</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[44]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>res15: Float = 0.38268194
+
+</pre></div>
+</div>
+</div>
+<p>In total, it appears that less than 40 percent of the area surveyed in
+these three scenes is forested. While there are improvements to be made,
+this algorithm could easily be adapted to survey land of any size.
+Landsat 8 has a temporal resolution of 16 days, and tracking these
+numbers over time could give an estimate of the rate of change of
+deforestation in a certain area, or with enough compute power, the
+entire Amazon Rainforest.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">RasterFrames-Docs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Case studies:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Python/Forest/forest-demo.html">Forest Cover Case Study</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Python/Housing/Housing.html">Housing Case Study</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Python/Minis/agg-functions.html">Aggregate functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Python/Minis/classification.html">Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Python/Minis/clustering.html">Clustering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Python/Minis/creating-rasterframes.html">Creating&nbsp;RasterFrames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Python/Minis/exporting-rasterframes.html">Exporting&nbsp;RasterFrames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Python/Minis/Getting Started with RasterFrames.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Python/Minis/local-spatial-functions.html">Local Spatial Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Python/Minis/masking.html">Tile masking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Python/Minis/NDVI.html">Calculating NDVI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Python/Minis/statistics.html">Raster Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Python/Minis/tile-arithmetic.html">Tile Arithmetic</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Astraea.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../../_sources/Scala/forest/forest-demo.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
