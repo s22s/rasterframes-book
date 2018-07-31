@@ -1,7 +1,7 @@
 # RasterFrames-book
 
 RasterFrames-book is a repository containing examples and tutorials for the [RasterFrames library](https://github.com/locationtech/rasterframes).
-The docs cover Scala and Python, and are in notebook format, using the spylon kernel for scala and the python3 kernel for python.
+The docs cover Scala and Python, and are in notebook format, using the spylon kernel for scala and the python3 kernel for python. Before building the container, the repository must be cloned and the docker-compose file in RasterFrames must be changed to add the volume containing the cloned repo. Once the docker image is built, `docker run --rm -v ***Volume path here*** s22s/rasterframes-notebooks python3 -m sphinx . _build` will build the docs, placing them into `_build` in your volume. 
 
 ## Generating HTML
 
