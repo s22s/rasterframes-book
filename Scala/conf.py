@@ -64,7 +64,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = ['.build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints', '**-scala**']
+exclude_patterns = ['.build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 
 # nbsphinx_execute = 'always'
 
@@ -80,8 +80,7 @@ pygments_style = 'sphinx'
 # a list of builtin themes.
 #
 html_theme = 'astraea_theme'
-html_theme_path = ["."]
-
+html_theme_path = ["../"]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

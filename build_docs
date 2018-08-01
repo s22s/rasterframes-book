@@ -1,0 +1,13 @@
+#!/bin/bash
+# Evaluates python and scala notebooks and builds website
+if [ ${1^^} = "SCALA" ]; then
+    python3 -m sphinx ./Scala Scala/_build
+elif [ ${1^^} = "PYTHON" ]; then
+    python3 -m sphinx . _build
+elif [ ${1^^} = "ALL" ]; then
+    python3 -m sphinx ./Scala Scala/_build 
+    python3 -m sphinx . _build
+else
+    echo "options are python, scala, or all"
+fi
+
