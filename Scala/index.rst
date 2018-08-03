@@ -1,32 +1,1 @@
-.. RasterFrames-Docs documentation master file, created by
-   sphinx-quickstart on Mon Jul 30 16:22:32 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-RasterFrames Scala documentation
-=============================================
-
-.. note:: 
-   These are the docs for Scala. `Here <file:///Users/jnachbar/Documents/rasterframes-book/_build/index.html>`_ are the docs for Python.
-
-
-.. toctree::
-   :maxdepth: 1
-   
-   forest/forest-demo-scala
-   Housing/housing-scala
-
-   :caption: Mini examples:
-
-   Minis/agg-functions-scala.ipynb
-   Minis/classification-scala.ipynb
-   Minis/clustering-scala.ipynb   Minis/creating-rasterframes-scala.ipynb   Minis/exporting-rasterframes-scala.ipynb   Minis/Getting Started with RasterFrames-scala.ipynb   Minis/local-spatial-functions-scala.ipynb
-   Minis/masking-scala.ipynb   Minis/ndvi-scala.ipynb
-   Minis/statistics-scala.ipynb   Minis/tile-arithmetic-scala.ipynb
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. RasterFrames-Docs documentation master file, created by   sphinx-quickstart on Mon Jul 30 16:22:32 2018.   You can adapt this file completely to your liking, but it should at least   contain the root `toctree` directive.RasterFrames Scala documentation=============================================.. note::    These are the docs for Scala. `Here <../../_build/index.html>`_ are the docs for Python... toctree::   :maxdepth: 1      forest/forest-demo-scala   Housing/housing-scala   :caption: Mini examples:   Minis/agg-functions-scala.ipynb   Minis/classification-scala.ipynb   Minis/clustering-scala.ipynb   Minis/creating-rasterframes-scala.ipynb   Minis/exporting-rasterframes-scala.ipynb   Minis/Getting Started with RasterFrames-scala.ipynb   Minis/local-spatial-functions-scala.ipynb   Minis/masking-scala.ipynb   Minis/ndvi-scala.ipynb   Minis/statistics-scala.ipynb   Minis/tile-arithmetic-scala.ipynbIndices and tables==================* :ref:`genindex`* :ref:`modindex`* :ref:`search`
