@@ -1,14 +1,25 @@
-# RasterFrames-book
+# RasterFrames User Manual and Tutorials
 
-RasterFrames-book is a repository containing examples and tutorials for the [RasterFrames library](https://github.com/locationtech/rasterframes). The docs cover Scala and Python, and are in Jupyter Notebook format, using the "spylon" kernel for Scala and the "python3" kernel for Python. 
+This repository contains examples and tutorials for the [RasterFrames Spark Library](https://github.com/locationtech/rasterframes). The documentation covers both Scala and Python, and are in Jupyter Notebook format. The "spylon" Jupyter kernel is used for Scala and the "python3" kernel for Python. 
 
-Before building the container, the RasterFrames repository must be cloned and the `docker-compose.yml` file in RasterFrames must be changed to add the volume containing the cloned repo. Once the docker image is built, navigate to `rasterframes/deployment/docker/jupyter`. Once in this directory, run 
+## Generating HTML
 
-    docker run --rm -v ***Volume path here*** s22s/rasterframes-notebooks ./build_docs all
+To build the documentation, clone this repository, and run:
+
+    cd rasterframes-book
+    docker run --rm -v $PWD:/home/jovyan/work s22s/rasterframes-notebooks ./build_docs all
     
 This will build all the docs, placing them into `_build` and `Scala/_build` in your volume. It is possible to build just the Python or Scala docs by specifying the language as an argument to `build_docks` instead of `all`.
 
-## Generating HTML
+## Preview HTML
+
+To Preview the results, run:
+
+    (cd _build/; python3 -m http.server)
+
+and point your browser go to [http://localhost:8000/]().
+
+## Details
 
 This project uses `nbsphinx` to convert `.ipynb` files to `.html`. The table of contents is located in `index.rst`. Files added to the table of contents will automatically be linked to and have their markdown subsections linked to as well. 
 
@@ -16,10 +27,7 @@ To build the project, launch the rasterframes notebook container and make sure t
 
 Sections at level two within a notebook (that is, with two octothorps (`##`) in front of the markdown section) will be converted to subsections in the table of contents. 
 
-## Evaluating notebooks
+## Evaluating Notebooks
 
 Notebooks will automatically be evaluated every time the documentation is rebuilt. 
 
-## Preview HTML
-
-`.html` files are placed in the `_build/html` directory once the script is run.
