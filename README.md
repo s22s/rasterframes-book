@@ -7,15 +7,15 @@ This repository contains examples and tutorials for the [RasterFrames Spark Libr
 To build the documentation, clone this repository, and run:
 
     cd rasterframes-book
-    docker run --rm -v $PWD:/home/jovyan/work s22s/rasterframes-notebooks ./build_docs all
+    docker run --rm -v $PWD:/home/jovyan s22s/rasterframes-notebooks ./build_docs all
     
-This will build all the docs, placing them into `_build` and `Scala/_build` in your volume. It is possible to build just the Python or Scala docs by specifying the language as an argument to `build_docks` instead of `all`.
+This will build all the docs, placing them into `target/site` in your volume. It is possible to build just the Python or Scala docs by specifying the language as an argument to `build_docs` instead of `all`.
 
 ## Preview HTML
 
 To Preview the results, run:
 
-    (cd _build/; python3 -m http.server)
+    (cd target/site/; python3 -m http.server)
 
 and point your browser go to [http://localhost:8000/]().
 

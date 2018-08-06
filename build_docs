@@ -1,13 +1,27 @@
-#!/bin/bash
+#!/bin/bash 
 # Evaluates python and scala notebooks and builds website
-if [ ${1^^} = "SCALA" ]; then
-    python3 -m sphinx ./Scala Scala/_build
-elif [ ${1^^} = "PYTHON" ]; then
-    python3 -m sphinx . _build
-elif [ ${1^^} = "ALL" ]; then
-    python3 -m sphinx ./Scala Scala/_build 
-    python3 -m sphinx . _build
+
+HERE=$(dirname "$(readlink -f "$0")")
+
+SPHINX="python3 -m sphinx"
+
+build_python() {
+    $SPHINX "$HERE" "$HERE/target/site"
+}
+build_scala() {
+    $SPHINX "$HERE/Scala" "$HERE/target/site/Scala"
+}
+
+if [ "${1^^}" = "SCALA" ]; then
+    build_scala
+elif [ "${1^^}" = "PYTHON" ]; then
+    build_python
+elif [ "${1^^}" = "ALL" ]; then
+    build_scala
+    build_python
+elif [ "${1^^}" = "CLEAN" ]; then
+    rm -r "$HERE/target"
 else
-    echo "options are python, scala, or all"
+    echo "Usage: $0 {python|scala|all|clean}"
 fi
 
