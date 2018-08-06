@@ -27,7 +27,7 @@ elif [ "${1^^}" = "ALL" ]; then
 elif [ "${1^^}" = "CLEAN" ]; then
     rm -r "$HERE/target"
 else
-    echo "Usage: $0 {python|scala|all|clean}"
+    echo "Usage: $0 {python|scala|all|clean} {eval}"
 fi
 
 if [ "${2^^}" = "EVAL" ]; then
