@@ -7,7 +7,7 @@ RasterFrames Python documentation
 =============================================
 
 .. note:: 
-   These are the docs for Python. `Here <../Scala/_build/index.html>`_ are the docs for Scala.
+   These are the docs for Python. `Here <./Scala/index.html>`_ are the docs for Scala.
 
 
 .. toctree::
@@ -20,14 +20,11 @@ RasterFrames Python documentation
    Python/Minis/agg-functions.ipynb
    Python/Minis/clustering.ipynb
 
-   Python/Minis/classification.ipynb   Python/Minis/local-spatial-functions.ipynb
-   Python/Minis/Polygon-Filtering.ipynb   Python/Minis/masking.ipynb   Python/Minis/ndvi.ipynb
-   Python/Minis/statistics.ipynb   Python/Minis/tile-arithmetic.ipynb
+   Python/Minis/classification.ipynb
+   Python/Minis/local-spatial-functions.ipynb
+   Python/Minis/Polygon-Filtering.ipynb
+   Python/Minis/masking.ipynb
+   Python/Minis/ndvi.ipynb
+   Python/Minis/statistics.ipynb
+   Python/Minis/tile-arithmetic.ipynb
    Python/Minis/exporting-rasterframes.ipynb
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

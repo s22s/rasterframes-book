@@ -24,9 +24,9 @@ copyright = '2018, Astraea'
 author = 'Astraea'
 
 # The short X.Y version
-version = ''
+version = '0.7'
 # The full version, including alpha/beta/rc tags
-release = '0.7.0'
+release = '0.7.2'
 
 
 # -- General configuration ---------------------------------------------------
