@@ -7,8 +7,8 @@ RasterFrames Python documentation
 =============================================
 
 .. note:: 
-   These are the docs for Python. `Here <./Scala/index.html>`_ are the docs for Scala.
 
+   These are the docs for Python. `Here <./Scala/index.html>`_ are the docs for Scala.
 
 .. toctree::
    :maxdepth: 1

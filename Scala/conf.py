@@ -19,8 +19,8 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'RasterFrames-Docs'
-copyright = '2018, Astraea'
+project = 'RasterFrames'
+copyright = '2018, Astraea, Inc.'
 author = 'Astraea'
 
 # The short X.Y version
@@ -49,7 +49,7 @@ templates_path = ['.templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
 
 # The master toctree document.
 master_doc = 'index'
@@ -107,7 +107,7 @@ html_static_path = ['.static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'RasterFrames-Docsdoc'
+htmlhelp_basename = 'RasterFrames-doc'
 
 
 # -- Options for LaTeX output ------------------------------------------------

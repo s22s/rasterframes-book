@@ -12,6 +12,11 @@ build_scala() {
     $SPHINX "$HERE/Scala" "$HERE/target/site/Scala"
 }
 
+if [ "${2^^}" = "EVAL" ]; then
+    sed -i 's/# nbsphinx_execute/nbsphinx_execute/g'  conf.py
+    sed -i 's/# nbsphinx_execute/nbsphinx_execute/g'  Scala/conf.py
+fi
+
 if [ "${1^^}" = "SCALA" ]; then
     build_scala
 elif [ "${1^^}" = "PYTHON" ]; then
@@ -25,3 +30,7 @@ else
     echo "Usage: $0 {python|scala|all|clean}"
 fi
 
+if [ "${2^^}" = "EVAL" ]; then
+    sed -i 's/nbsphinx_execute/# nbsphinx_execute/g' conf.py
+    sed -i 's/nbsphinx_execute/# nbsphinx_execute/g' Scala/conf.py
+fi
