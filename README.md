@@ -29,5 +29,5 @@ Sections at level two within a notebook (that is, with two octothorps (`##`) in 
 
 ## Evaluating Notebooks
 
-Notebooks will automatically be evaluated every time the documentation is rebuilt. 
+If the `eval` keyword is passed after the choice of language when running build_docs, nbsphinx will run every cell in each notebook, stopping if any errors are encountered and outputting the result to html as usual. 
 
