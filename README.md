@@ -9,7 +9,7 @@ To build the documentation, clone this repository, and run:
     cd rasterframes-book
     docker run --rm -v $PWD:/home/jovyan s22s/rasterframes-notebooks ./build_docs all
     
-This will build all the docs, placing them into `target/site` in your volume. It is possible to build just the Python or Scala docs by specifying the language as an argument to `build_docs` instead of `all`.
+This will build all the docs, placing them into `target/site` in your volume. Alternatively, specifying clean instead of all will clean the `target/site` directory.
 
 ## Preview HTML
 
