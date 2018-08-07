@@ -16,7 +16,7 @@
 body {
     font-family: "Nobile", sans-serif;
     font-size: 100%;
-    background-color: #393939;
+    background-color: #393939 ;
     color: #00ffff;
     margin: 0;
     padding: 0;
@@ -40,14 +40,14 @@ div.document {
 }
 
 div.header {
-    width:100%;
-    background: #f4ad32 url(headerbg.png) repeat-x 0 top;
-    border-bottom: 200px solid #ffffff;
+    width:15%;
 }
 
 div.logo {
     text-align: center;
     padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
 }
 
 div.body {
@@ -58,6 +58,7 @@ div.body {
     border: 2px solid #ddd;
     border-right-style: none;
     overflow: auto;
+    max-width: 1200px;
 }
  
 div.footer {
@@ -106,7 +107,7 @@ div.sphinxsidebarwrapper{
  
 div.sphinxsidebar h3,
 div.sphinxsidebar h4 {
-    font-family: "Neuton", sans-serif;
+    font-family: "Nunito", sans-serif;
     color: #373839;
     font-size: 1.4em;
     font-weight: normal;
@@ -190,7 +191,7 @@ div.body h3,
 div.body h4,
 div.body h5,
 div.body h6 {
-    font-family: "Neuton", sans-serif;
+    font-family: "arial", sans-serif;
     background-color: #ffffff;
     font-weight: normal;
     color: #373839;
@@ -198,12 +199,12 @@ div.body h6 {
     padding: 5px 0;
 }
  
-div.body h1 { border-top: 20px solid white; margin-top: 0; font-size: 200%; }
-div.body h2 { font-size: 150%; background-color: #ffffff; }
-div.body h3 { font-size: 120%; background-color: #ffffff; }
-div.body h4 { font-size: 110%; background-color: #ffffff; }
-div.body h5 { font-size: 100%; background-color: #ffffff; }
-div.body h6 { font-size: 100%; background-color: #ffffff; }
+div.body h1 { border-top: 20px solid white; margin-top: 0; font-size: 200%; font-family: "arial"; }
+div.body h2 { font-size: 150%; background-color: #ffffff; font-family: "arial"; }
+div.body h3 { font-size: 120%; background-color: #ffffff; font-family: "arial"; }
+div.body h4 { font-size: 110%; background-color: #ffffff; font-family: "arial"; }
+div.body h5 { font-size: 100%; background-color: #ffffff; font-family: "arial"; }
+div.body h6 { font-size: 100%; background-color: #ffffff; font-family: "arial"; }
  
 a.headerlink {
     color: #1b61d6;

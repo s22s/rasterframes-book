@@ -27,7 +27,7 @@ most features are available in both langugages, sometimes they are expressed
 in slightly different forms to be more idiomatic to the language. 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    Python/index
    Scala/index

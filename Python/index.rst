@@ -3,7 +3,7 @@ RasterFrames Python
 ##########################
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :numbered:
    
    Minis/creating-rasterframes.ipynb

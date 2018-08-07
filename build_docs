@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 # Evaluates python and scala notebooks and builds website
 
 HERE=$(dirname "$(readlink -f "$0")")

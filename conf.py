@@ -84,6 +84,9 @@ pygments_style = 'sphinx'
 html_theme = 'astraea_theme'
 html_theme_path = ["."]
 
+html_logo = 'assets/RasterFramesLogo.png'
+
+html_favicon = 'assets/RasterFrames_32x32.ico'
 #html_theme = 'bizstyle'
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -105,7 +108,7 @@ html_theme_path = ["."]
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-html_sidebars = { '**': ['localtoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html']}
+html_sidebars = { '**': ['globaltoc.html', 'localtoc.html', 'searchbox.html']}
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
