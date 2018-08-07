@@ -1,36 +1,24 @@
-#!/bin/bash 
+#!/bin/bash -ex
 # Evaluates python and scala notebooks and builds website
 
 HERE=$(dirname "$(readlink -f "$0")")
 
-SPHINX="python3 -m sphinx"
-
-build_python() {
-    $SPHINX "$HERE" "$HERE/target/site"
-}
-build_scala() {
-    $SPHINX "$HERE/Scala" "$HERE/target/site/Scala"
-}
+OPTS="-j3"
 
 if [ "${2^^}" = "EVAL" ]; then
-    sed -i 's/# nbsphinx_execute/nbsphinx_execute/g'  conf.py
-    sed -i 's/# nbsphinx_execute/nbsphinx_execute/g'  Scala/conf.py
+    OPTS="$OPTS -D nbsphinx_execute=always"
 fi
 
-if [ "${1^^}" = "SCALA" ]; then
-    build_scala
-elif [ "${1^^}" = "PYTHON" ]; then
-    build_python
-elif [ "${1^^}" = "ALL" ]; then
-    build_python
-    build_scala
+SPHINX="python3 -m sphinx $OPTS"
+
+build_all() {
+    $SPHINX "$HERE/." "$HERE/target/site"
+}
+
+if [ "${1^^}" = "ALL" ]; then
+    build_all
 elif [ "${1^^}" = "CLEAN" ]; then
     rm -r "$HERE/target"
 else
-    echo "Usage: $0 {python|scala|all|clean} {eval}"
-fi
-
-if [ "${2^^}" = "EVAL" ]; then
-    sed -i 's/nbsphinx_execute/# nbsphinx_execute/g' conf.py
-    sed -i 's/nbsphinx_execute/# nbsphinx_execute/g' Scala/conf.py
+    echo "Usage: $0 {all|clean} [eval]"
 fi

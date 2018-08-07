@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'RasterFrames'
-copyright = '2018, Astraea, Inc.'
+copyright = '2018, Astraea, Inc'
 author = 'Astraea'
 
 # The short X.Y version
@@ -41,6 +41,8 @@ release = '0.7.2'
 extensions = [ 'nbsphinx',
               'sphinx.ext.mathjax',
 ]
+
+nbsphinx_allow_errors = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['.templates']
@@ -64,7 +66,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = ['.build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints', '**-scala**', '**Scala/**']
+exclude_patterns = ['.build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 
 # nbsphinx_execute = 'always'
 
@@ -82,6 +84,7 @@ pygments_style = 'sphinx'
 html_theme = 'astraea_theme'
 html_theme_path = ["."]
 
+#html_theme = 'bizstyle'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -92,7 +95,7 @@ html_theme_path = ["."]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['.static']
+#html_static_path = ['.static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -102,8 +105,7 @@ html_static_path = ['.static']
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-# html_sidebars = {}
-
+html_sidebars = { '**': ['localtoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html']}
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
@@ -113,7 +115,7 @@ htmlhelp_basename = 'RasterFrames-doc'
 
 # -- Options for LaTeX output ------------------------------------------------
 
-latex_elements = {
+#latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
@@ -129,25 +131,25 @@ latex_elements = {
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
-}
+#}
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, 'RasterFrames-Docs.tex', 'RasterFrames-Docs Documentation',
-     'Astraea', 'manual'),
-]
+# latex_documents = [
+#     (master_doc, 'RasterFrames-Docs.tex', 'RasterFrames-Docs Documentation',
+#      'Astraea', 'manual'),
+# ]
 
 
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'rasterframes-docs', 'RasterFrames-Docs Documentation',
-     [author], 1)
-]
+# man_pages = [
+#     (master_doc, 'rasterframes-docs', 'RasterFrames-Docs Documentation',
+#      [author], 1)
+# ]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -155,8 +157,8 @@ man_pages = [
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
-texinfo_documents = [
-    (master_doc, 'RasterFrames-Docs', 'RasterFrames-Docs Documentation',
-     author, 'RasterFrames-Docs', 'One line description of project.',
-     'Miscellaneous'),
-]
+# texinfo_documents = [
+#     (master_doc, 'RasterFrames-Docs', 'RasterFrames-Docs Documentation',
+#      author, 'RasterFrames-Docs', 'One line description of project.',
+#      'Miscellaneous'),
+# ]
