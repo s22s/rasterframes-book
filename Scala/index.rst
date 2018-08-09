@@ -6,6 +6,7 @@ RasterFrames Scala
    :maxdepth: 1
    :numbered:
 
+   Minis/getting-started-scala.ipynb
    Minis/creating-rasterframes-scala.ipynb
    Minis/local-spatial-functions-scala.ipynb
    Minis/exporting-rasterframes-scala.ipynb
@@ -17,4 +18,3 @@ RasterFrames Scala
    Minis/clustering-scala.ipynb
    Minis/classification-scala.ipynb
    forest/forest-demo-scala.ipynb
-   Housing/housing-scala.ipynb
