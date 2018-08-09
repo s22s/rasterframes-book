@@ -6,9 +6,7 @@ RasterFrames Python
    :maxdepth: 1
    :numbered:
    
-   Minis/creating-rasterframes.ipynb
    Minis/local-spatial-functions.ipynb
-   Minis/exporting-rasterframes.ipynb
    Minis/statistics.ipynb
    Minis/agg-functions.ipynb
    Minis/NDVI.ipynb
