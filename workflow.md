@@ -1,0 +1,7 @@
+# rasterframes-book workflow
+
+The easiest way to make changes to rasterframes-book is to clone rasterframes and then build the jupyter docker container by 
+running sbt deployment/rfNotebookContainer from the rasterframes working directory. Once that notebook is built, navigate to
+rasterframes/deployment/docker/jupyter and run docker-compose up. The container will automatically clone the rasterframes-book repo
+Connect to the url presented in the shell. Once there, make the necessary changes and then commit them by opening up a new terminal from the "new" menu in the top right corner. Commit and push the changes like any other git project. Images or other media on your computer can be inserted by being in a markdown cell and selecting edit > insert image. The html from build_docs can be previewed by going to the terminal and running ./build_docs. The corresponding html will be placed in target/site and can be viewed from the notebook by just opening one of the html files from within the notebook. Once the notebooks are ready to be run, commit changes and close the notebook. Then, go to the computer responsible for hosting the files and clone the rasterframes-book repo and build the docker image in the repo. This will automatically build the html and when the container is run with the -p option, mapping whatever local port to port 8000 (the one exposed in the docker container) the container will be ready to serve the html.
+
