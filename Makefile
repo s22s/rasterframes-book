@@ -6,7 +6,7 @@ NB_EVAL=jupyter nbconvert --ExecutePreprocessor.timeout=-1 --to notebook --inpla
 SRC=.
 SITE_DEST=target/site
 
-PY_NOTEBOOKS=$(shell find ./Python/Minis -name '*.ipynb'| grep -v '/UF-')
+PY_NOTEBOOKS=$(shell find ./Python -name '*.ipynb'| grep -v '/UF-')
 
 .PHONY: sources
 sources:

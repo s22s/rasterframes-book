@@ -7,9 +7,9 @@ This repository contains examples and tutorials for the [RasterFrames Spark Libr
 To build the documentation, clone this repository, and run:
 
     cd rasterframes-book
-    docker run --rm -v $PWD:/home/jovyan s22s/rasterframes-notebooks ./build_docs all
+    make full
     
-This will build all the docs, except for those with UF in front of their name (for unfinished), placing them into `target/site` in your volume. Alternatively, specifying clean instead of all will clean the `target/site` directory.
+This will build all the docs, except for those with UF in front of their name (for unfinished), placing them into `target/site` in your volume.  Running `make clean` will delete the generated site and any byproducts. `make quick` will build the site with the content of the cells as they were last saved.
 
 ## Preview HTML
 
@@ -29,10 +29,10 @@ Sections at level two within a notebook (that is, with two octothorps (`##`) in 
 
 ## Evaluating Notebooks
 
-If the `eval` keyword is passed after the choice of language when running build_docs, nbsphinx will run every cell in each notebook, stopping if any errors are encountered and outputting the result to html as usual. 
+If you run `make eval`, nbsphinx will run every cell in each notebook, stopping if any errors are encountered and outputting the result to html as usual. 
 
 ## Hosting the server 
 
 Build and run the docker container specified by the Dockerfile, making sure that when it is run, the exposed port in the docker container (8000) is connected to a port outside the docker container to allow it to be accessed 
 
-(should look like `docker run -p 8000:8000 **CONTAINER**`)
+(should look like `docker run -p 8000:8000 <image-hash>`)
